@@ -34,34 +34,9 @@ class UserPolicy
         return $authUser->can('delete:user');
     }
 
-    public function restore(AuthUser $authUser): bool
+    public function export(AuthUser $authUser): bool
     {
-        return $authUser->can('restore:user');
-    }
-
-    public function forceDelete(AuthUser $authUser): bool
-    {
-        return $authUser->can('force_delete:user');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('force_delete_any:user');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('restore_any:user');
-    }
-
-    public function replicate(AuthUser $authUser): bool
-    {
-        return $authUser->can('replicate:user');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('reorder:user');
+        return $authUser->can('export:user');
     }
 
 }

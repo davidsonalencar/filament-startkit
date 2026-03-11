@@ -32,39 +32,14 @@ class RolePolicy
         return $authUser->can('update:role');
     }
 
-    public function delete(AuthUser $authUser, Role $role): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('delete:role');
     }
 
-    public function restore(AuthUser $authUser, Role $role): bool
+    public function export(AuthUser $authUser): bool
     {
-        return $authUser->can('restore:role');
-    }
-
-    public function forceDelete(AuthUser $authUser, Role $role): bool
-    {
-        return $authUser->can('force_delete:role');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('force_delete_any:role');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('restore_any:role');
-    }
-
-    public function replicate(AuthUser $authUser, Role $role): bool
-    {
-        return $authUser->can('replicate:role');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('reorder:role');
+        return $authUser->can('export:role');
     }
 
 }

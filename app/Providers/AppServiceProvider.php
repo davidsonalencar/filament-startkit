@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use BezhanSalleh\FilamentShield\Commands;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
+use Filament\Actions\DeleteBulkAction;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +23,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerProhibitedCommands();
+        $this->configureDeleteBulkAction();
+    }
+
+    protected function configureDeleteBulkAction(): void
+    {
+        DeleteBulkAction::configureUsing(function (DeleteBulkAction $action) {
+            $action->authorize('delete');
+        });
     }
 
     protected function registerProhibitedCommands(): void

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Filament\Actions\BulkExport\ExportBulkAction;
+use App\Filament\Actions\Export\ExportAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -14,6 +16,9 @@ class UsersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->headerActions([
+                ExportAction::make(),
+            ])
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
@@ -30,9 +35,9 @@ class UsersTable
                     })
                     ->formatStateUsing(fn($state): string => str($state)->replace('_', ' ')->title())
                     ->toggleable(),
-                TextColumn::make('email_verified_at')
-                    ->dateTime()
-                    ->sortable(),
+//                TextColumn::make('email_verified_at')
+//                    ->dateTime()
+//                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -51,6 +56,7 @@ class UsersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    ExportBulkAction::make(),
                     DeleteBulkAction::make(),
                 ]),
             ]);

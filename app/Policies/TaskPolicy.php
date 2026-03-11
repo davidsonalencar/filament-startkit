@@ -32,39 +32,14 @@ class TaskPolicy
         return $authUser->can('update:task');
     }
 
-    public function delete(AuthUser $authUser, Task $task): bool
+    public function delete(AuthUser $authUser): bool
     {
         return $authUser->can('delete:task');
     }
 
-    public function restore(AuthUser $authUser, Task $task): bool
+    public function export(AuthUser $authUser): bool
     {
-        return $authUser->can('restore:task');
-    }
-
-    public function forceDelete(AuthUser $authUser, Task $task): bool
-    {
-        return $authUser->can('force_delete:task');
-    }
-
-    public function forceDeleteAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('force_delete_any:task');
-    }
-
-    public function restoreAny(AuthUser $authUser): bool
-    {
-        return $authUser->can('restore_any:task');
-    }
-
-    public function replicate(AuthUser $authUser, Task $task): bool
-    {
-        return $authUser->can('replicate:task');
-    }
-
-    public function reorder(AuthUser $authUser): bool
-    {
-        return $authUser->can('reorder:task');
+        return $authUser->can('export:task');
     }
 
     public function complete(AuthUser $authUser, Task $task): bool
