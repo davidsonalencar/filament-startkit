@@ -10,6 +10,7 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Schema;
+use Filament\Support\Facades\FilamentTimezone;
 use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
         $this->registerProhibitedCommands();
         $this->configureDeleteBulkAction();
         $this->configureFormats();
+        $this->configureTimezon();
+
     }
 
     protected function configureFormats(): void
@@ -65,6 +68,14 @@ class AppServiceProvider extends ServiceProvider
         DeleteBulkAction::configureUsing(function (DeleteBulkAction $action) {
             $action->authorize('delete');
         });
+    }
+
+    protected function configureTimezon()
+    {
+        FilamentTimezone::set(fn() => auth()->user()?->timezone
+            ?? request()->header('X-Timezone')
+            ?? config('app.fallback_timezone')
+        );
     }
 
     protected function registerProhibitedCommands(): void
