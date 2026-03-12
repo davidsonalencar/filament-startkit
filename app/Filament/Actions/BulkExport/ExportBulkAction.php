@@ -32,7 +32,7 @@ class ExportBulkAction
                 $format = $data['format'];
                 $columns = self::getVisibleColumns($table);
 
-                $mappedRecords = $records->map(fn($record) => self::mapRecord($record, $columns));
+                $mappedRecords = $records->map(fn($record) => self::mapRecord($record, $columns, $table));
 
                 return self::executeExport($mappedRecords, $columns, $format, $type, $table->getLivewire());
             });

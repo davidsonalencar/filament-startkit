@@ -6,8 +6,10 @@ use App\Exports\FilamentExport;
 use App\Jobs\ExportJob;
 use App\Models\Export;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\Column;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -41,12 +43,61 @@ trait CanExport
         }
     }
 
-    protected static function mapRecord($record, array $columns): array
+    protected static function mapRecord($record, array $columns, Table $table = null): array
     {
         $data = [];
-        foreach (array_keys($columns) as $columnName) {
-            $data[$columnName] = data_get($record, $columnName);
+
+        if (!$table) {
+            foreach (array_keys($columns) as $columnName) {
+                $data[$columnName] = data_get($record, $columnName);
+            }
+
+            return $data;
         }
+
+        $tableColumns = collect($table->getColumns())->keyBy(fn(Column $column) => $column->getName());
+
+        foreach (array_keys($columns) as $columnName) {
+            /** @var Column|null $column */
+            $column = $tableColumns->get($columnName);
+
+            if (!$column) {
+                $data[$columnName] = data_get($record, $columnName);
+                continue;
+            }
+
+            // Vincula o registro atual à coluna
+            $column->record($record);
+
+            // Pega o estado bruto respeitando getStateUsing(), relationships etc.
+            $state = method_exists($column, 'getFormattedState')
+                ? $column->getFormattedState()
+                : $column->getState();
+
+            // Aplica a formatação da coluna: dateTime(), money(), numeric(), formatStateUsing()...
+            $value = method_exists($column, 'formatState')
+                ? $column->formatState($state)
+                : $state;
+
+            // Normaliza valores renderizáveis para exportação
+            if ($value instanceof Htmlable) {
+                $value = $value->toHtml();
+            }
+
+            if (is_string($value)) {
+                $value = trim(strip_tags($value));
+            }
+
+            if (is_array($value)) {
+                $value = implode(', ', array_map(
+                    fn($item) => is_scalar($item) ? (string)$item : json_encode($item, JSON_UNESCAPED_UNICODE),
+                    $value
+                ));
+            }
+
+            $data[$columnName] = $value;
+        }
+
         return $data;
     }
 

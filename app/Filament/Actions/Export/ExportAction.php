@@ -38,7 +38,7 @@ class ExportAction
                 // $query = $livewire->getFilteredTableQuery();
                 self::applyTableSorting($table, $query);
 
-                $records = $query->get()->map(fn($record) => self::mapRecord($record, $columns));
+                $records = $query->get()->map(fn($record) => self::mapRecord($record, $columns, $table));
 
                 return self::executeExport($records, $columns, $format, $type, $livewire);
             });
