@@ -22,16 +22,21 @@ class TasksTable
             ])
             ->columns([
                 TextColumn::make('user.name')
+                    ->label(__('filament/admin/task_resource.user.name'))
                     ->sortable(),
                 TextColumn::make('name')
+                    ->label(__('filament/admin/task_resource.name'))
                     ->searchable(),
                 IconColumn::make('is_completed')
+                    ->label(__('filament/admin/task_resource.is_completed'))
                     ->boolean(),
                 TextColumn::make('created_at')
+                    ->label(__('filament/admin/task_resource.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('filament/admin/task_resource.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

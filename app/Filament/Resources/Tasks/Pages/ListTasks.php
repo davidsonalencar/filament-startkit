@@ -16,4 +16,14 @@ class ListTasks extends ListRecords
             CreateAction::make()->createAnother(false),
         ];
     }
+
+    public function getTitle(): string
+    {
+        return __('filament/admin/list_tasks.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/list_tasks.title');
+    }
 }

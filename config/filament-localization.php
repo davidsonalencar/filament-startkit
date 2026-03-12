@@ -26,7 +26,7 @@ return [
 
     'locales' => [
         'en',
-        'pt_BR'
+        'pt_BR',
     ],
 
     /*
@@ -55,7 +55,7 @@ return [
     |
     */
 
-    'backup' => true,
+    'backup' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -68,7 +68,7 @@ return [
     */
 
     'git' => [
-        'enabled' => true,
+        'enabled' => false,
         'commit_message' => 'chore: add Filament localization support',
     ],
 

@@ -21,12 +21,13 @@ class UsersTable
             ])
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('filament/admin/user_resource.name'))
                     ->searchable(),
                 TextColumn::make('email')
-                    ->label('Email address')
+                    ->label(__('filament/admin/user_resource.email'))
                     ->searchable(),
                 TextColumn::make('role')
-                    ->label('Role')
+                    ->label(__('filament/admin/user_resource.role'))
                     ->getStateUsing(fn($record) => str($record->getRoleNames()->first() ?? 'user'))
                     ->badge()
                     ->color(fn($state): string => match ($state) {
@@ -36,13 +37,16 @@ class UsersTable
                     ->formatStateUsing(fn($state): string => str($state)->replace('_', ' ')->title())
                     ->toggleable(),
 //                TextColumn::make('email_verified_at')
+//                    ->label(__('filament/admin/user_resource.email_verified_at'))
 //                    ->dateTime()
 //                    ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('filament/admin/user_resource.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('filament/admin/user_resource.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

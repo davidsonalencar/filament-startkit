@@ -14,11 +14,14 @@ class TaskForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('filament/admin/task_resource.name'))
                     ->required()
                     ->maxLength(255),
                 Textarea::make('description')
+                    ->label(__('filament/admin/task_resource.description'))
                     ->columnSpanFull(),
                 Toggle::make('is_completed')
+                    ->label(__('filament/admin/task_resource.is_completed'))
                     ->required(),
             ]);
     }

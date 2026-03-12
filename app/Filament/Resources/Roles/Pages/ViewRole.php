@@ -18,4 +18,14 @@ class ViewRole extends ViewRecord
             EditAction::make(),
         ];
     }
+
+    public function getTitle(): string
+    {
+        return __('filament/admin/view_role.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/view_role.title');
+    }
 }

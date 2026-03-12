@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Roles;
 
-use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
 use App\Filament\Resources\Roles\Pages\ViewRole;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use BezhanSalleh\FilamentShield\Support\Utils;
 use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
 use BezhanSalleh\PluginEssentials\Concerns\Resource as Essentials;
@@ -49,7 +49,7 @@ class RoleResource extends Resource
                         Section::make()
                             ->schema([
                                 TextInput::make('name')
-                                    ->label(__('filament-shield::filament-shield.field.name'))
+                                    ->label(__('filament/admin/role_resource.name'))
                                     ->unique(
                                         ignoreRecord: true, /** @phpstan-ignore-next-line */
                                         modifyRuleUsing: fn (Unique $rule): Unique => Utils::isTenancyEnabled() ? $rule->where(Utils::getTenantModelForeignKey(), Filament::getTenant()?->id) : $rule
@@ -58,7 +58,7 @@ class RoleResource extends Resource
                                     ->maxLength(255),
 
                                 TextInput::make('guard_name')
-                                    ->label(__('filament-shield::filament-shield.field.guard_name'))
+                                    ->label(__('filament/admin/role_resource.guard_name'))
                                     ->default(Utils::getFilamentAuthGuard())
                                     ->nullable()
                                     ->maxLength(255),
@@ -91,27 +91,27 @@ class RoleResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->weight(FontWeight::Medium)
-                    ->label(__('filament-shield::filament-shield.column.name'))
+                    ->label(__('filament/admin/role_resource.name'))
                     ->formatStateUsing(fn (string $state): string => Str::headline($state))
                     ->searchable(),
                 TextColumn::make('guard_name')
                     ->badge()
                     ->color('warning')
-                    ->label(__('filament-shield::filament-shield.column.guard_name')),
+                    ->label(__('filament/admin/role_resource.guard_name')),
                 TextColumn::make('team.name')
                     ->default('Global')
                     ->badge()
                     ->color(fn (mixed $state): string => str($state)->contains('Global') ? 'gray' : 'primary')
-                    ->label(__('filament-shield::filament-shield.column.team'))
+                    ->label(__('filament/admin/role_resource.team.name'))
                     ->searchable()
                     ->visible(fn (): bool => static::shield()->isCentralApp() && Utils::isTenancyEnabled()),
                 TextColumn::make('permissions_count')
                     ->badge()
-                    ->label(__('filament-shield::filament-shield.column.permissions'))
+                    ->label(__('filament/admin/role_resource.permissions_count'))
                     ->counts('permissions')
                     ->color('primary'),
                 TextColumn::make('updated_at')
-                    ->label(__('filament-shield::filament-shield.column.updated_at'))
+                    ->label(__('filament/admin/role_resource.updated_at'))
                     ->dateTime(),
             ])
             ->filters([
@@ -161,5 +161,20 @@ class RoleResource extends Resource
     public static function getEssentialsPlugin(): ?FilamentShieldPlugin
     {
         return FilamentShieldPlugin::get();
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/role_resource.navigation_label');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('filament/admin/role_resource.model_label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('filament/admin/role_resource.plural_model_label');
     }
 }

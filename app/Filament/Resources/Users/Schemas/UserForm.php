@@ -13,16 +13,19 @@ class UserForm
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('filament/admin/user_resource.name'))
                     ->required(),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label(__('filament/admin/user_resource.email'))
                     ->email()
                     ->required(),
                 TextInput::make('password')
+                    ->label(__('filament/admin/user_resource.password'))
                     ->password()
                     ->revealable()
                     ->required(),
                 Select::make('roles')
+                    ->label(__('filament/admin/user_resource.roles'))
                     ->relationship('roles', 'name')
                     ->multiple()
                     ->preload()

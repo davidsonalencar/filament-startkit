@@ -52,4 +52,14 @@ class EditRole extends EditRecord
         // @phpstan-ignore-next-line
         $this->record->syncPermissions($permissionModels);
     }
+
+    public function getTitle(): string
+    {
+        return __('filament/admin/edit_role.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/edit_role.title');
+    }
 }

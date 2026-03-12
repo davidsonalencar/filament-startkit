@@ -16,4 +16,14 @@ class ViewTask extends ViewRecord
             EditAction::make(),
         ];
     }
+
+    public function getTitle(): string
+    {
+        return __('filament/admin/view_task.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/view_task.title');
+    }
 }

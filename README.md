@@ -122,4 +122,9 @@ sail artisan make:filament-theme
 
 sail artisan install:broadcasting
 
+# Gerar traduções
+sail artisan shield:translation pt_BR --panel=admin
+
+# Atualizar permissoes
+sail artisan shield:generate --all
 ```

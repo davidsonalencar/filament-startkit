@@ -16,4 +16,14 @@ class ViewUser extends ViewRecord
             EditAction::make(),
         ];
     }
+
+    public function getTitle(): string
+    {
+        return __('filament/admin/view_user.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('filament/admin/view_user.title');
+    }
 }
