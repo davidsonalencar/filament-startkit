@@ -57,8 +57,8 @@ prepare_directories() {
     mkdir -p "$APP_DIR/storage"
     mkdir -p "$APP_DIR/bootstrap/cache"
 
-    chmod -R ugo+rw /.composer "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
-    chown -R "$APP_UID:$APP_GID" /.composer "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
+    chmod -R ugo+rw /.composer "$APP_DIR/.env" "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
+    chown -R "$APP_UID:$APP_GID" /.composer "$APP_DIR/.env" "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
 }
 
 # -------------------------------------------------------------------
@@ -107,18 +107,39 @@ install_node_dependencies() {
 }
 
 # -------------------------------------------------------------------
-# APP_KEY
+# APP_KEY e Outros Segredos
 # -------------------------------------------------------------------
-generate_app_key_if_needed() {
-    if [ -f "$APP_DIR/.env" ] && [ -f "$APP_DIR/artisan" ]; then
-        if ! grep -q "^APP_KEY=" "$APP_DIR/.env" || grep -q "^APP_KEY=$" "$APP_DIR/.env"; then
-            log "APP_KEY ausente. Gerando nova chave..."
-            run_as_app_user "php artisan key:generate --force"
-        else
-            log "APP_KEY já configurada."
-        fi
+generate_secrets_if_needed() {
+    if [ ! -f "$APP_DIR/.env" ] || [ ! -f "$APP_DIR/artisan" ]; then
+        log ".env ou artisan não encontrado. Pulando geração de segredos."
+        return
+    fi
+
+    # 1) APP Keys
+    if ! grep -q "^APP_KEY=" "$APP_DIR/.env" || grep -q "^APP_KEY=$" "$APP_DIR/.env" || grep -q "^APP_KEY=base64:$" "$APP_DIR/.env"; then
+        log "APP_KEY ausente ou vazia. Gerando nova chave..."
+        run_as_app_user "php artisan key:generate --force"
     else
-        log ".env ou artisan não encontrado. Pulando geração de APP_KEY."
+        log "APP_KEY já configurada."
+    fi
+
+    # 4) REVERB Keys
+    if grep -q "^REVERB_APP_ID=$" "$APP_DIR/.env"; then
+        log "Gerando REVERB_APP_ID..."
+        NEW_ID=$(shuf -i 100000-999999 -n 1 2>/dev/null || echo $((100000 + RANDOM % 899999)))
+        sed "s/^REVERB_APP_ID=$/REVERB_APP_ID=$NEW_ID/" "$APP_DIR/.env" > /tmp/.env.tmp && cat /tmp/.env.tmp > "$APP_DIR/.env"
+    fi
+
+    if grep -q "^REVERB_APP_KEY=$" "$APP_DIR/.env"; then
+        log "Gerando REVERB_APP_KEY..."
+        NEW_KEY=$(openssl rand -hex 10)
+        sed "s/^REVERB_APP_KEY=$/REVERB_APP_KEY=$NEW_KEY/" "$APP_DIR/.env" > /tmp/.env.tmp && cat /tmp/.env.tmp > "$APP_DIR/.env"
+    fi
+
+    if grep -q "^REVERB_APP_SECRET=$" "$APP_DIR/.env"; then
+        log "Gerando REVERB_APP_SECRET..."
+        NEW_SECRET=$(openssl rand -hex 20)
+        sed "s/^REVERB_APP_SECRET=$/REVERB_APP_SECRET=$NEW_SECRET/" "$APP_DIR/.env" > /tmp/.env.tmp && cat /tmp/.env.tmp > "$APP_DIR/.env"
     fi
 }
 
@@ -180,7 +201,7 @@ main() {
     prepare_directories
     install_php_dependencies
     install_node_dependencies
-    generate_app_key_if_needed
+    generate_secrets_if_needed
     prepare_production_public_dir
     run_migrations
     run_optimize_commands
