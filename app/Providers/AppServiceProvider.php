@@ -12,6 +12,7 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentTimezone;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 
@@ -25,16 +26,13 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         $this->registerProhibitedCommands();
         $this->configureDeleteBulkAction();
         $this->configureFormats();
         $this->configureTimezon();
-
+        $this->configureUrlSchema();
     }
 
     protected function configureFormats(): void
@@ -76,6 +74,13 @@ class AppServiceProvider extends ServiceProvider
             ?? request()->header('X-Timezone')
             ?? config('app.fallback_timezone')
         );
+    }
+
+    protected function configureUrlSchema()
+    {
+        if (config('app.schema') === 'https') {
+            URL::forceScheme('https');
+        }
     }
 
     protected function registerProhibitedCommands(): void

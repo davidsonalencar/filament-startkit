@@ -1,0 +1,192 @@
+#!/usr/bin/env bash
+set -e
+
+# -------------------------------------------------------------------
+# Configuração base
+# -------------------------------------------------------------------
+APP_DIR="/var/www/html"
+APP_USER="sail"
+APP_UID="${WWWUSER:-1337}"
+APP_GID="${WWWGROUP:-1337}"
+APP_ENVIRONMENT="${APP_ENV:-local}"
+
+cd "$APP_DIR"
+
+# -------------------------------------------------------------------
+# Helpers
+# -------------------------------------------------------------------
+
+log() {
+    echo "[start-container] $1"
+}
+
+run_as_app_user() {
+    gosu "${APP_UID}:${APP_GID}" bash -lc "cd '$APP_DIR' && $1"
+}
+
+path_exists() {
+    [ -e "$1" ]
+}
+
+# -------------------------------------------------------------------
+# Ajuste de usuário/grupo
+# -------------------------------------------------------------------
+# Permite alinhar UID/GID do usuário do container com o host,
+# evitando problemas de permissão em volumes bindados.
+configure_user() {
+    log "Configurando usuário/grupo da aplicação..."
+
+    if getent group "$APP_GID" >/dev/null 2>&1; then
+        EXISTING_GROUP="$(getent group "$APP_GID" | cut -d: -f1)"
+        usermod -g "$APP_GID" "$APP_USER" || true
+        log "Grupo $APP_GID já existe ($EXISTING_GROUP)."
+    else
+        groupmod -o -g "$APP_GID" "$APP_USER" || true
+    fi
+
+    usermod -o -u "$APP_UID" "$APP_USER" || true
+}
+
+# -------------------------------------------------------------------
+# Diretórios básicos e permissões
+# -------------------------------------------------------------------
+prepare_directories() {
+    log "Preparando diretórios e permissões..."
+
+    mkdir -p /.composer
+    mkdir -p "$APP_DIR/storage"
+    mkdir -p "$APP_DIR/bootstrap/cache"
+
+    chmod -R ugo+rw /.composer "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
+    chown -R "$APP_UID:$APP_GID" /.composer "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" || true
+}
+
+# -------------------------------------------------------------------
+# Dependências PHP
+# -------------------------------------------------------------------
+# Instala dependências apenas se o projeto existir e o vendor estiver ausente.
+install_php_dependencies() {
+    if path_exists "$APP_DIR/composer.json"; then
+        if [ ! -f "$APP_DIR/vendor/autoload.php" ]; then
+            log "vendor/autoload.php não encontrado. Executando composer install..."
+
+            run_as_app_user "composer install --no-interaction --prefer-dist"
+        else
+            log "Dependências PHP já presentes."
+        fi
+    else
+        log "composer.json não encontrado. Pulando composer install."
+    fi
+}
+
+# -------------------------------------------------------------------
+# Dependências Node
+# -------------------------------------------------------------------
+# Em dev, pode ser útil instalar automaticamente. Em produção,
+# normalmente o ideal é já vir buildado na imagem.
+install_node_dependencies() {
+    if path_exists "$APP_DIR/package.json"; then
+        if [ ! -d "$APP_DIR/node_modules" ]; then
+            log "node_modules não encontrado. Instalando dependências Node..."
+
+            if path_exists "$APP_DIR/package-lock.json"; then
+                run_as_app_user "npm install"
+            elif path_exists "$APP_DIR/yarn.lock"; then
+                run_as_app_user "yarn install"
+            elif path_exists "$APP_DIR/pnpm-lock.yaml"; then
+                run_as_app_user "pnpm install"
+            else
+                run_as_app_user "npm install"
+            fi
+        else
+            log "Dependências Node já presentes."
+        fi
+    else
+        log "package.json não encontrado. Pulando instalação Node."
+    fi
+}
+
+# -------------------------------------------------------------------
+# APP_KEY
+# -------------------------------------------------------------------
+generate_app_key_if_needed() {
+    if [ -f "$APP_DIR/.env" ] && [ -f "$APP_DIR/artisan" ]; then
+        if ! grep -q "^APP_KEY=" "$APP_DIR/.env" || grep -q "^APP_KEY=$" "$APP_DIR/.env"; then
+            log "APP_KEY ausente. Gerando nova chave..."
+            run_as_app_user "php artisan key:generate --force"
+        else
+            log "APP_KEY já configurada."
+        fi
+    else
+        log ".env ou artisan não encontrado. Pulando geração de APP_KEY."
+    fi
+}
+
+# -------------------------------------------------------------------
+# Cache / assets para nginx em produção
+# -------------------------------------------------------------------
+prepare_production_public_dir() {
+    if [ "$APP_ENVIRONMENT" = "production" ]; then
+        log "Preparando volume nginx_public para produção..."
+
+        find "$APP_DIR/public/nginx" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        find "$APP_DIR/public" -mindepth 1 -maxdepth 1 ! -name nginx -exec cp -a {} "$APP_DIR/public/nginx/" \;
+    fi
+}
+
+# -------------------------------------------------------------------
+# Migrations
+# -------------------------------------------------------------------
+run_migrations() {
+    if [ -f "$APP_DIR/artisan" ] && [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+        log "Executando migrations..."
+
+        if [ "$APP_ENVIRONMENT" = "production" ]; then
+            run_as_app_user "php artisan migrate --force || true"
+#           run_as_app_user "php artisan tenants:migrate --force || true"
+        else
+            run_as_app_user "php artisan migrate || true"
+#           run_as_app_user "php artisan tenants:migrate || true"
+        fi
+    else
+        log "Migrations desabilitadas ou artisan não encontrado."
+    fi
+}
+
+# -------------------------------------------------------------------
+# Optimize / clear
+# -------------------------------------------------------------------
+run_optimize_commands() {
+    if [ -f "$APP_DIR/artisan" ] && [ "${RUN_OPTIMIZE:-1}" = "1" ]; then
+        log "Executando comandos de otimização..."
+
+        if [ "$APP_ENVIRONMENT" = "production" ]; then
+            run_as_app_user "php artisan optimize || true"
+#           run_as_app_user "php artisan tenants:run optimize || true"
+        else
+            run_as_app_user "php artisan optimize:clear || true"
+#           run_as_app_user "php artisan tenants:run optimize:clear || true"
+        fi
+    else
+        log "Optimize desabilitado ou artisan não encontrado."
+    fi
+}
+
+# -------------------------------------------------------------------
+# Fluxo principal
+# -------------------------------------------------------------------
+main() {
+    configure_user
+    prepare_directories
+    install_php_dependencies
+    install_node_dependencies
+    generate_app_key_if_needed
+    prepare_production_public_dir
+    run_migrations
+    run_optimize_commands
+
+    log "Inicialização concluída. Executando processo principal: $*"
+    exec "$@"
+}
+
+main "$@"

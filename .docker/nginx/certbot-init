@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -e
+
+# Variáveis vindas do docker-compose
+: "${APP_HOST:?APP_HOST não definido}"
+: "${CERTBOT_EMAIL:?CERTBOT_EMAIL não definido}"
+
+until nc -z nginx 80; do
+    echo "Waiting for proxy..."
+    sleep 5s & wait ${!}
+done
+
+CERT_PATH="/etc/letsencrypt/live/$APP_HOST/fullchain.pem"
+
+echo "[certbot] Inicializando certificado para o domínio: $APP_HOST"
+
+# Se NÃO existir certificado, emite um novo
+if [ ! -f "$CERT_PATH" ]; then
+  echo "[certbot] Certificado não encontrado para $APP_HOST. Solicitando com Certbot..."
+
+  # Garante que o Nginx tem uma config HTTP válida para responder o desafio
+  # Se estiver usando o plugin nginx:
+  certbot --nginx \
+    -d "$APP_HOST" \
+    -d "www.$APP_HOST" \
+    --redirect \
+    --agree-tos \
+    -m "$CERTBOT_EMAIL" \
+    --non-interactive
+
+  echo "[certbot] Certificado emitido para $APP_HOST"
+else
+  echo "[certbot] Certificado já existe em $CERT_PATH. Pulando emissão."
+fi
+
+echo "[certbot] Iniciando cron e supervisord..."

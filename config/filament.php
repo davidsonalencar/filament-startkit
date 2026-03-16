@@ -21,6 +21,7 @@ return [
             'key' => env('VITE_REVERB_APP_KEY'),
             'cluster' => env('VITE_REVERB_APP_CLUSTER'),
             'wsHost' => env('VITE_REVERB_HOST'),
+            'wsPath' => env('VITE_REVERB_PATH'),
             'wsPort' => env('VITE_REVERB_PORT', 80),
             'wssPort' => env('VITE_REVERB_PORT', 443),
             'forceTLS' => (env('VITE_REVERB_SCHEME', 'https') === 'https'),
@@ -28,7 +29,7 @@ return [
             'disableStats' => true,
             'encrypted' => true,
         ],
-        
+
     ],
 
     /*

@@ -3,8 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev:admin": "vite --config vite.admin.config.js",
-        "dev:app": "vite --config vite.config.js",
+        "dev:admin": "vite --config vite.admin.config.js --port ${VITE_ADMIN_PORT:-5173}",
+        "dev:app": "vite --config vite.config.js --port ${VITE_PORT:-5174}",
         "build:app": "vite build --config vite.config.js",
         "build:admin": "vite build --config vite.admin.config.js",
         "dev": "npm run dev:admin & npm run dev:app",

@@ -43,6 +43,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Schema
+    |--------------------------------------------------------------------------
+    |
+    | This value determines the URL scheme (protocol) used by your application.
+    | Common values are "http" or "https". This can be used to enforce or
+    | determine the protocol when generating URLs or redirects.
+    |
+    */
+
+    'schema' => env('APP_SCHEMA', 'http'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |
