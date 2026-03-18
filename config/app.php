@@ -2,6 +2,11 @@
 
 return [
 
+    'version' => env('APP_VERSION',
+        file_exists(base_path('VERSION'))
+            ? trim(file_get_contents(base_path('VERSION')))
+            : 'dev'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name

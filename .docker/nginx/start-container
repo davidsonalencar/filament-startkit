@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -e
+
+# -------------------------------------------------------------------
+# Configuração base
+# -------------------------------------------------------------------
+#APP_HOST="${APP_HOST}"
+
+# -------------------------------------------------------------------
+# Helpers
+# -------------------------------------------------------------------
+
+log() {
+    echo "[start-container] $1"
+}
+
+# -------------------------------------------------------------------
+# Configure nginx upstreams
+# -------------------------------------------------------------------
+run_create_upstreams_conf() {
+    log "Criando ou atualizando /etc/nginx/conf.d/upstreams.conf"
+
+    cat > /etc/nginx/conf.d/upstreams.conf <<'EOF'
+upstream app_backend {
+    include /etc/nginx/app_upstream.conf;
+}
+
+upstream reverb_backend {
+    server reverb:8080;
+}
+EOF
+}
+
+# -------------------------------------------------------------------
+# Configure nginx app conf
+# -------------------------------------------------------------------
+run_create_app_conf() {
+    if [ ! -f /etc/nginx/conf.d/${APP_HOST}.conf ]; then
+        envsubst '$APP_HOST' < /etc/nginx/default.conf.tpl > /etc/nginx/conf.d/${APP_HOST}.conf \
+        || true
+    fi
+}
+
+# -------------------------------------------------------------------
+# Fluxo principal
+# -------------------------------------------------------------------
+main() {
+    run_create_upstreams_conf
+    run_create_app_conf
+
+    log "Inicialização concluída. Executando processo principal: $*"
+    exec "$@"
+}
+
+main "$@"

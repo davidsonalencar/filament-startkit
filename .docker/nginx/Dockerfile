@@ -3,22 +3,17 @@
 # -----------------------------
 FROM nginx:stable AS base
 
-ARG APP_HOST
-ENV APP_HOST=$APP_HOST
-ENV WS_DOMAIN="ws.$APP_HOST"
-
 # Diretório onde o Nginx vai enxergar o projeto
 WORKDIR /var/www/html
 
 # Preparação do nginx conf
 RUN mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.disabled 2>/dev/null || true
 
-COPY ./.docker/nginx/default.conf.tpl /etc/nginx/conf.d/.
+COPY ./.docker/nginx/default.conf.tpl /etc/nginx/.
+COPY ./.docker/nginx/app_upstream.conf /etc/nginx/.
 
-RUN sh -c "[ ! -f /etc/nginx/conf.d/${APP_HOST}.conf ] \
-  && envsubst '\$APP_HOST' < /etc/nginx/conf.d/default.conf.tpl \
-       > /etc/nginx/conf.d/${APP_HOST}.conf \
-  || true"
+COPY ./.docker/nginx/start-container /usr/local/bin/start-container
+RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80
 EXPOSE 443
@@ -57,6 +52,7 @@ COPY ./.docker/nginx/supervisord.conf /etc/supervisor/supervisord.conf
 COPY ./.docker/nginx/certbot-init /usr/local/bin/certbot-init
 RUN chmod +x /usr/local/bin/certbot-init
 
+ENTRYPOINT ["start-container"]
 CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
 
 
@@ -65,4 +61,5 @@ CMD ["supervisord", "-n", "-c", "/etc/supervisor/supervisord.conf"]
 # -----------------------------
 FROM base AS development
 
+ENTRYPOINT ["start-container"]
 CMD ["nginx", "-g", "daemon off;"]

@@ -47,8 +47,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 # Usuário/grupo
 RUN userdel -r ubuntu || true
-RUN groupadd --force -g ${WWWGROUP} sail
-RUN useradd -ms /bin/bash --no-user-group -g ${WWWGROUP} -u 1337 sail
+#RUN groupadd --force -g ${WWWGROUP} sail
+#RUN useradd -ms /bin/bash --no-user-group -g ${WWWGROUP} -u 1337 sail
 # RUN git config --global --add safe.directory /var/www/html
 
 
@@ -233,6 +233,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     php8.5-xdebug \
     php8.5-pcov \
     netcat-traditional \
+    zip \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

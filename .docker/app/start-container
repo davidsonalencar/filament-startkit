@@ -6,8 +6,8 @@ set -e
 # -------------------------------------------------------------------
 APP_DIR="/var/www/html"
 APP_USER="sail"
-APP_UID="${WWWUSER:-1337}"
-APP_GID="${WWWGROUP:-1337}"
+APP_UID="${WWWUSER:-1000}"
+APP_GID="${WWWGROUP:-1000}"
 APP_ENVIRONMENT="${APP_ENV:-local}"
 
 cd "$APP_DIR"
@@ -36,15 +36,33 @@ path_exists() {
 configure_user() {
     log "Configurando usuário/grupo da aplicação..."
 
-    if getent group "$APP_GID" >/dev/null 2>&1; then
-        EXISTING_GROUP="$(getent group "$APP_GID" | cut -d: -f1)"
-        usermod -g "$APP_GID" "$APP_USER" || true
-        log "Grupo $APP_GID já existe ($EXISTING_GROUP)."
-    else
-        groupmod -o -g "$APP_GID" "$APP_USER" || true
+    GROUP_NAME="$(getent group "$APP_GID" | cut -d: -f1 || true)"
+
+    if [ -z "$GROUP_NAME" ]; then
+        if getent group "$APP_USER" >/dev/null 2>&1; then
+            groupmod -o -g "$APP_GID" "$APP_USER" || true
+        else
+            groupadd -g "$APP_GID" "$APP_USER"
+        fi
+        GROUP_NAME="$APP_USER"
     fi
 
-    usermod -o -u "$APP_UID" "$APP_USER" || true
+    if id -u "$APP_USER" >/dev/null 2>&1; then
+        usermod -o -u "$APP_UID" "$APP_USER" || true
+        usermod -g "$GROUP_NAME" "$APP_USER" || true
+    else
+        useradd -ms /bin/bash -u "$APP_UID" -g "$GROUP_NAME" "$APP_USER"
+    fi
+
+#    if getent group "$APP_GID" >/dev/null 2>&1; then
+#        EXISTING_GROUP="$(getent group "$APP_GID" | cut -d: -f1)"
+#        usermod -g "$APP_GID" "$APP_USER" || true
+#        log "Grupo $APP_GID já existe ($EXISTING_GROUP)."
+#    else
+#        groupmod -o -g "$APP_GID" "$APP_USER" || true
+#    fi
+#
+#    usermod -o -u "$APP_UID" "$APP_USER" || true
 }
 
 # -------------------------------------------------------------------

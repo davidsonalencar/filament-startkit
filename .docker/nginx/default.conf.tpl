@@ -1,11 +1,3 @@
-upstream php_backend {
-    include /etc/nginx/upstream.conf;
-}
-
-upstream reverb_backend {
-    server reverb:8080;
-}
-
 server {
     listen 80;
     listen [::]:80;
@@ -40,7 +32,7 @@ server {
     error_page 404 /index.php;
 
     location ~ ^/index\.php(/|$) {
-        fastcgi_pass php_backend;
+        fastcgi_pass app_backend;
 
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
 
