@@ -5,7 +5,8 @@ FROM ubuntu:24.04 AS base
 
 LABEL maintainer="Davidson Alencar"
 
-ARG WWWGROUP
+ARG APP_VERSION
+ENV APP_VERSION=${APP_VERSION}
 
 WORKDIR /var/www/html
 
