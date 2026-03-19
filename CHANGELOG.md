@@ -1,3 +1,7 @@
+## 2026.3.3 - 2026-03-19
+
+- Refactor Envoy deployment scripts for improved reliability and modularity
+
 ## 2026.3.1 - 2026-03-18
 
 - Refactor Docker Compose configurations and automate Envoy tasks
