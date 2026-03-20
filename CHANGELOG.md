@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.8](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.7...v2026.3.8) (2026-03-20)
+
+### Outras Melhorias
+
+* remove `release:app` task from Envoy script ([bb5a1b8](https://github.com/davidsonalencar/filament-startkit/commit/bb5a1b829c948a93e4bfe579c940f4e9bcb5b8eb))
+
 ## [2026.3.7](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.6...v2026.3.7) (2026-03-20)
 
 ### Outras Melhorias
