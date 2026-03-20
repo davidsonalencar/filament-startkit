@@ -44,7 +44,9 @@
     $app_image = "$registry/$namespace/$image";
     $nginx_image = "$registry/$namespace/$image-nginx";
 
-    $deploy_history = "$path/.deploy_history.txt"
+    $deploy_history = "$path/.deploy_history.txt";
+
+    $nginx_upstreams = "/etc/nginx/conf.d/upstreams.conf";
 @endsetup
 
 
@@ -63,22 +65,18 @@
     services:up
 @endstory
 
-{{--docker exec matrix-app-1 ls -li .env--}}
-{{--ls -li .env--}}
-{{--docker exec matrix-nginx-1 ls -li /etc/nginx/app_upstream.conf--}}
-{{--ls -li .docker/nginx/app_upstream.conf--}}
-{{--docker exec matrix-nginx-1 cat /etc/nginx/app_upstream.conf--}}
 
 @story('deploy', ['on' => $servers, 'parallel' => true])
     deploy:validate
     deploy:stack
     history:save
     env:set-deploy-tag
-    services:pull
+    app:pull
     deploy:up
     deploy:wait
     nginx:use-deploy
     app:up
+    app:wait
     nginx:use-app
     deploy:down
 @endstory
@@ -88,11 +86,12 @@
     rollback:validate
     rollback:stack
     env:set-rollback-tag
-    services:pull
+    app:pull
     deploy:up
     deploy:wait
     nginx:use-deploy
     app:up
+    app:wait
     nginx:use-app
     deploy:down
     history:pop
@@ -105,13 +104,13 @@
 
 
 @task('release:app', ['on' => 'local'])
-    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/git.sh' ?>
 
     VERSION_OPTION={{ $tag }}
 
     echo "🔍 Buscando última tag..."
 
-    LAST_TAG=$(git describe --tags --abbrev=0 --exclude latest --exclude "*alpha*" --exclude "*beta*" --exclude "*rc*" --exclude "*dev*" --exclude "*pre*" --exclude "*alfa*" 2>/dev/null || echo "")
+    LAST_TAG=$(get_last_release_tag)
 
     if [ -z "$LAST_TAG" ]; then
       echo "⚠️ Nenhuma tag encontrada. Usando todos os commits."
@@ -209,8 +208,7 @@
 
 
 @task('release:stack', ['on' => 'local'])
-    set -euo pipefail
-    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/env.sh' ?>
 
     CURR_DIR=$(pwd)
     TEMP_DIR=$(mktemp -d)
@@ -324,25 +322,14 @@
 
 
 @task('bootstrap:validate', ['on' => $servers, 'parallel' => true])
-    if [ -z "{{ $domain }}" ]; then
-        echo ""
-        echo "❌ Erro: parâmetro obrigatório ausente"
-        echo " "
-        echo "Uso correto:"
-        echo "  envoy run deploy --domain=filament.davidsonalencar.com"
-        echo " "
-        exit 1
-    fi
+    <?php require __DIR__.'/resources/views/envoy/common.sh' ?>
 
-    if [ -d "{{ $path }}" ]; then
-        echo "❌ Erro: diretório "{{ $path  }}" já existe."
-        exit 1
-    else
+    domain="{{ $domain }}"
+    path="{{ $path }}"
 
-    if [ -f .env ]; then
-        echo "❌ Erro: arquivo ".env" já existe."
-        exit 1
-    fi
+    require_arg domain
+    require_arg path
+    require_file "{{ $path }}/.env"
 @endtask
 
 
@@ -360,55 +347,40 @@
 
 
 @task('deploy:validate', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/common.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/env.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/git.sh' ?>
+
     cd {{ $path }}
 
 {{-- VERIFICAR A VERSAI EM USO NO CONTAINER APP --}}
+    require_file "{{ $path }}/.env"
 
-    echo ">> Verificando se existe nova versão para deploy"
+    log_info "Verificando se existe nova versão para deploy"
 
     docker network inspect matrix_network >/dev/null 2>&1 || {
-      echo "❌ Network matrix_network não existe"
-      exit 1
+      fail "Network matrix_network não existe"
     }
 
-    DEPLOY_TAG="{{ $tag }}"
-
-    if [ "$DEPLOY_TAG" = "latest" ]; then
-        echo ">> Buscando última versão do git"
-        git fetch origin --prune --tags --force
-        DEPLOY_TAG=$(git tag | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-        echo ">> Tag encontrada: ${DEPLOY_TAG}"
+    DEPLOY_TAG=$(resolve_version_tag "{{ $tag }}")
+    if [ -z "$DEPLOY_TAG" ]; then
+        fail "--tag nao definida"
     fi
 
-    if [ "$DEPLOY_TAG" = "" ]; then
-        echo "❌ Erro: --tag nao definida"
-        exit 1
-    fi
-
-    if [ ! -f .env ]; then
-        echo ">> "
-        echo "❌ Erro: Arquivo .env não encontrado, primeira instalação será realizada"
-        exit 1
-    fi
-
-    CURRENT_TAG=$(grep '^APP_TAG=' .env | cut -d'=' -f2 || echo "")
-
+    CURRENT_TAG=$(get_env "APP_TAG")
     if [ -z "$CURRENT_TAG" ]; then
-        echo ">> "
-        echo "❌ Erro: Nenhuma versão atual encontrada, prosseguindo com deploy"
-        exit 1
+        log_warn "Nenhuma versão atual encontrada, prosseguindo com deploy"
+        exit 0
     fi
 
-    echo ">> Versão atual: ${CURRENT_TAG}"
-    echo ">> Versão alvo: ${DEPLOY_TAG}"
+    log_info "Versão atual: ${CURRENT_TAG}"
+    log_info "Versão alvo: ${DEPLOY_TAG}"
 
     if [ "$CURRENT_TAG" = "$DEPLOY_TAG" ]; then
-        echo "✅ Versão já está atualizada, nenhuma ação necessária"
-        exit 1
+        fail "Versão já está atualizada, nenhuma ação necessária"
     fi
 
-    echo ">> Nova versão detectada, prosseguindo com deploy"
+    log_info "Nova versão detectada, prosseguindo com deploy"
 @endtask
 
 
@@ -438,25 +410,13 @@
 
 
 @task('deploy:wait', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/common.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/docker.sh' ?>
     cd {{ $path }}
 
     CONTAINER=$(docker compose --env-file .env -f ./.docker/compose/deploy.yaml ps -q app_deployment)
-
-    for i in $(seq 1 40); do
-      STATUS=$(docker inspect --format='{{"{{"}}if .State.Health}}{{"{{"}}.State.Health.Status}}{{"{{"}}else}}starting{{"{{"}}end}}' $CONTAINER 2>/dev/null || true)
-
-      if [ "$STATUS" = "healthy" ]; then
-        echo "app_deployment healthy"
-        exit 0
-      fi
-
-      echo "waiting app_deployment... attempt $i/40 status=$STATUS"
-      sleep 3
-    done
-
-    docker logs $CONTAINER || true
-    exit 1
+    require_var CONTAINER
+    wait_for_container_health $CONTAINER
 @endtask
 
 
@@ -510,8 +470,7 @@
 {{--------------------------------------------------------------------------------------------------------------------}}
 
 @task('env:config', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/env.sh' ?>
 
     cd {{ $path }}
 
@@ -537,7 +496,7 @@
 
 @task('env:set-deploy-tag', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
-    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/env.sh' ?>
     cd {{ $path }}
 
     DEPLOY_TAG="{{ $tag }}"
@@ -552,7 +511,7 @@
 
 @task('env:set-rollback-tag', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
-    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+    <?php require __DIR__.'/resources/views/envoy/env.sh' ?>
 
     cd {{ $path }}
 
@@ -590,18 +549,36 @@
 @endtask
 
 
+@task('app:pull', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+    docker compose pull app
+@endtask
+
+@task('app:wait', ['on' => $servers, 'parallel' => true])
+    <?php require __DIR__.'/resources/views/envoy/docker.sh' ?>
+
+    cd {{ $path }}
+
+    CONTAINER=$(docker compose ps -q app)
+    wait_for_container_health $CONTAINER
+@endtask
+
+
 {{--------------------------------------------------------------------------------------------------------------------}}
 {{-- NGINX --}}
 {{--------------------------------------------------------------------------------------------------------------------}}
 
-
+w
 @task('nginx:use-deploy', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
 
-    docker compose exec -T {{ $nginx_service }} sed -i "s|[a-zA-Z_\-]+:|app_deployment:|" "/etc/nginx/conf.d/upstreams.conf"
-    docker compose exec -T {{ $nginx_service }} nginx -t
-    docker compose exec -T {{ $nginx_service }} nginx -s reload
+    docker compose exec -T {{ $nginx_service }} sh
+    sed -E -i "s| app:| app_deployment:|" "{{ $nginx_upstreams }}"
+    nginx -t
+    nginx -s reload
+    exit
 @endtask
 
 
@@ -609,9 +586,11 @@
     set -euo pipefail
     cd {{ $path }}
 
-    docker compose exec -T {{ $nginx_service }} sed -i "s|[a-zA-Z_\-]+:|app:|" "/etc/nginx/conf.d/upstreams.conf"
-    docker compose exec -T {{ $nginx_service }} nginx -t
-    docker compose exec -T {{ $nginx_service }} nginx -s reload
+    docker compose exec -T {{ $nginx_service }} sh
+    sed -E -i "s| app_deployment:| app:|" "{{ $nginx_upstreams }}"
+    nginx -t
+    nginx -s reload
+    exit
 @endtask
 
 
@@ -621,19 +600,15 @@
 
 
 @task('rollback:validate', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/common.sh' ?>
+
     cd {{ $path }}
 
-    if [ ! -f {{ $deploy_history }} ] || [ ! -s {{ $deploy_history }} ]; then
-        echo "❌ Erro: Nenhum arquivo de histórico de deploy encontrado"
-        exit 1
-    fi
+    require_file "{{ $deploy_history }}"
 
     ROLLBACK_TAG=$(tail -n 1 {{ $deploy_history }})
-
-    if [ "$ROLLBACK_TAG" = "" ]; then
-        echo "❌ Erro: Nenhum histórico de deploy encontrado"
-        exit 1
+    if [ -z "$ROLLBACK_TAG" ]; then
+        fail "Nenhum histórico de deploy encontrado"
     fi
 @endtask
 

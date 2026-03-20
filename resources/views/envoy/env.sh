@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
 
 set_env() {
     local key="$1"
@@ -17,4 +19,17 @@ set_env() {
     else
         echo "${key}=${value}" >> "$file"
     fi
+}
+
+get_env() {
+    local key="$1"
+    local file="${2:-.env}"
+
+    [ -f "$file" ] || return 0
+    grep "^${key}=" "$file" | tail -n 1 | cut -d'=' -f2-
+}
+
+ensure_env_file() {
+    local file="$1"
+    [ -f "$file" ] || fail "Arquivo de ambiente não encontrado: $file"
 }
