@@ -39,80 +39,72 @@
     $github_token = $github_token ?? env('GITHUB_TOKEN');
 
     $nginx_service = 'nginx';
-    $app_services = 'app horizon scheduler reverb';
+    $app_service = 'app horizon scheduler reverb';
 
     $app_image = "$registry/$namespace/$image";
     $nginx_image = "$registry/$namespace/$image-nginx";
 
     $deploy_history = "$path/.deploy_history.txt"
-
 @endsetup
 
 
 @story('release', ['on' => 'local'])
-    release_app
-    publish_stack
-    build_images
+    release:app
+    release:stack
+    release:images
 @endstory
 
 
 @story('bootstrap', ['on' => $servers, 'parallel' => true])
-    if [ -z "{{ $domain }}" ]; then
-        echo ""
-        echo "❌ Erro: parâmetro obrigatório ausente"
-        echo " "
-        echo "Uso correto:"
-        echo "  envoy run deploy --domain=filament.davidsonalencar.com"
-        echo " "
-        exit 1
-    fi
-
-    clone_update_stack
-    config_env
-    docker_login
-    pull_image
-    up_services
+    bootstrap:validate
+    bootstrap:stack
+    env:config
+    services:pull
+    services:up
 @endstory
 
+{{--docker exec matrix-app-1 ls -li .env--}}
+{{--ls -li .env--}}
+{{--docker exec matrix-nginx-1 ls -li /etc/nginx/app_upstream.conf--}}
+{{--ls -li .docker/nginx/app_upstream.conf--}}
+{{--docker exec matrix-nginx-1 cat /etc/nginx/app_upstream.conf--}}
 
 @story('deploy', ['on' => $servers, 'parallel' => true])
-{{--conferir se existe versões novas, caso contrario não faz nada--}}
-    save_current_tag_history
-    clone_update_stack
-    set_deploy_env_tag
-    pull_image
-    ensure_network
-    start_deployment
-    wait_deployment
-    switch_to_deployment
-    up_app
-    switch_back_to_app
-    remove_deployment
+    deploy:validate
+    deploy:stack
+    history:save
+    env:set-deploy-tag
+    services:pull
+    deploy:up
+    deploy:wait
+    nginx:use-deploy
+    app:up
+    nginx:use-app
+    deploy:down
 @endstory
 
 
 @story('rollback', ['on' => $servers, 'parallel' => true])
-    rollback_stack
-    set_rollback_env_tag
-    pull_image
-    start_deployment
-    wait_deployment
-    switch_to_deployment
-    up_app
-    switch_back_to_app
-    remove_deployment
-    remove_previous_tag_history
-    rollback_database
+    rollback:validate
+    rollback:stack
+    env:set-rollback-tag
+    services:pull
+    deploy:up
+    deploy:wait
+    nginx:use-deploy
+    app:up
+    nginx:use-app
+    deploy:down
+    history:pop
 @endstory
 
 
-{{--  --}}
-{{--  --}}
-{{--  --}}
-{{--  --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- RELEASE  --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
 
 
-@task('release_app', ['on' => 'local'])
+@task('release:app', ['on' => 'local'])
     set -euo pipefail
 
     VERSION_OPTION={{ $tag }}
@@ -215,8 +207,10 @@
 
 @endtask
 
-@task('publish_stack', ['on' => 'local'])
+
+@task('release:stack', ['on' => 'local'])
     set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
 
     CURR_DIR=$(pwd)
     TEMP_DIR=$(mktemp -d)
@@ -232,36 +226,15 @@
     echo ">> Preparando arquivos do stack"
     mkdir -p .docker/scripts .docker/nginx
 
-    cp "$CURR_DIR/.docker/nginx/app_upstream.conf" .docker/nginx/.
     cp -Rf "$CURR_DIR/.docker/compose/." .docker/compose/
     cp -Rf "$CURR_DIR/.env.prod.example" .
     cp -Rf "$CURR_DIR/compose.yaml" .
 
     echo ">> Configurando variáveis de ambiente"
-    if grep -q "^APP_IMAGE=" .env.prod.example 2>/dev/null; then
-        sed -i "s|^APP_IMAGE=.*|APP_IMAGE={{ $app_image }}|" .env.prod.example
-    else
-        echo "" >> .env.prod.example
-        echo "APP_IMAGE={{ $app_image }}" >> .env.prod.example
-    fi
-
-    if grep -q "^APP_TAG=" .env.prod.example 2>/dev/null; then
-        sed -i "s|^APP_TAG=.*|APP_TAG=${TAG}|" .env.prod.example
-    else
-        echo "APP_TAG=${TAG}" >> .env.prod.example
-    fi
-
-    if grep -q "^NGINX_IMAGE=" .env.prod.example 2>/dev/null; then
-        sed -i "s|^NGINX_IMAGE=.*|NGINX_IMAGE={{ $nginx_image }}|" .env.prod.example
-    else
-        echo "NGINX_IMAGE={{ $nginx_image }}" >> .env.prod.example
-    fi
-
-    if grep -q "^NGINX_TAG=" .env.prod.example 2>/dev/null; then
-        sed -i "s|^NGINX_TAG=.*|NGINX_TAG=${TAG}|" .env.prod.example
-    else
-        echo "NGINX_TAG=${TAG}" >> .env.prod.example
-    fi
+    set_env APP_IMAGE "{{ $app_image }}" .env.prod.example
+    set_env APP_TAG "$TAG" .env.prod.example
+    set_env NGINX_IMAGE "{{ $nginx_image }}" .env.prod.example
+    set_env NGINX_TAG "$TAG" .env.prod.example
 
     echo ">> Adicionando arquivos ao git"
     git add .
@@ -285,7 +258,7 @@
 @endtask
 
 
-@task('build_images', ['on' => 'local'])
+@task('release:images', ['on' => 'local'])
     set -euo pipefail
 
     TAG="$(cat VERSION)"
@@ -345,187 +318,126 @@
 @endtask
 
 
-{{--  --}}
-{{--  --}}
-{{--  --}}
-{{--  --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- BOOTSTRAP --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
 
 
-@task('save_current_tag_history', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
+@task('bootstrap:validate', ['on' => $servers, 'parallel' => true])
+    if [ -z "{{ $domain }}" ]; then
+        echo ""
+        echo "❌ Erro: parâmetro obrigatório ausente"
+        echo " "
+        echo "Uso correto:"
+        echo "  envoy run deploy --domain=filament.davidsonalencar.com"
+        echo " "
+        exit 1
+    fi
 
-    echo ">> Salvando versão atual antes do deploy"
+    if [ -d "{{ $path }}" ]; then
+        echo "❌ Erro: diretório "{{ $path  }}" já existe."
+        exit 1
+    else
 
     if [ -f .env ]; then
-        CURRENT_TAG=$(grep '^APP_TAG=' .env | cut -d'=' -f2)
-        if [ -n "$CURRENT_TAG" ]; then
-            echo "${CURRENT_TAG}" >> {{ $deploy_history }}
-            echo ">> Versão atual adicionada ao histórico: ${CURRENT_TAG}"
-        else
-            echo ">> Nenhuma tag encontrada no .env"
-        fi
-    else
-        echo ">> Arquivo .env não encontrado, primeira instalação"
+        echo "❌ Erro: arquivo ".env" já existe."
+        exit 1
     fi
 @endtask
 
 
-@task('clone_update_stack', ['on' => $servers, 'parallel' => true])
+@task('bootstrap:stack', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
 
-    echo ">> Verificando se o diretório {{ $path }} já existe"
-    if [ -d "{{ $path }}" ]; then
-        echo ">> Diretório já existe, atualizando repositório"
-        cd {{ $path }}
-    else
-        echo ">> Clonando repositório {{ $stack_repo }} em {{ $path }}"
-        git clone {{ $stack_repo }} {{ $path }}
-        cd {{ $path }}
-    fi
-
-    git fetch origin --prune --tags --force
-    git reset --hard {{ $tag }}
-
-    echo ">> Repositório clonado/atualizado com sucesso (tag: {{ $tag }})"
+    echo ">> Clonando repositório {{ $stack_repo }} em {{ $path }}"
+    git clone {{ $stack_repo }} {{ $path }}
 @endtask
 
 
-@task('ensure_network', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    docker network inspect matrix_network >/dev/null 2>&1 || docker network create matrix_network
-@endtask
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- DEPLOY --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
 
 
-@task('config_env', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-
-    cd {{ $path }}
-
-    if [ ! -f .env ]; then
-        echo ">> Criando arquivo .env a partir de .env.prod.example"
-        cp .env.prod.example .env
-    fi
-
-    echo ">> Configurando WWWUSER e WWWGROUP"
-    WWWUSER=$(id -u)
-    WWWGROUP=$(id -g)
-
-    if grep -q "^WWWUSER=" .env 2>/dev/null; then
-        sed -i "s|^WWWUSER=.*|WWWUSER=${WWWUSER}|" .env
-    else
-        echo "" >> .env
-        echo "WWWUSER=${WWWUSER}" >> .env
-    fi
-
-    if grep -q "^WWWGROUP=" .env 2>/dev/null; then
-        sed -i "s|^WWWGROUP=.*|WWWGROUP=${WWWGROUP}|" .env
-    else
-        echo "WWWGROUP=${WWWGROUP}" >> .env
-    fi
-
-    echo ">> Configurando APP_HOST"
-    if grep -q "^APP_HOST=" .env 2>/dev/null; then
-        sed -i "s|^APP_HOST=.*|APP_HOST={{ $domain }}|" .env
-    else
-        echo "APP_HOST={{ $domain }}" >> .env
-    fi
-
-    echo ">> Configurando APP_SCHEMA"
-    if grep -q "^APP_SCHEMA=" .env 2>/dev/null; then
-        sed -i "s|^APP_SCHEMA=.*|APP_SCHEMA={{ $schema }}|" .env
-    else
-        echo "APP_SCHEMA={{ $schema }}" >> .env
-    fi
-
-    echo ">> Gerando DB_PASSWORD se necessário"
-    if ! grep -q "^DB_PASSWORD=" .env 2>/dev/null || [ -z "$(grep '^DB_PASSWORD=' .env | cut -d'=' -f2)" ]; then
-        DB_PASSWORD=$(openssl rand -hex 16)
-        if grep -q "^DB_PASSWORD=" .env 2>/dev/null; then
-            sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env
-        else
-            echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
-        fi
-    fi
-
-    echo ">> Arquivo .env configurado com sucesso"
-@endtask
-
-
-@task('docker_login', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-
-    # Token apenas para leitura de packages para o docker
-
-    echo ">> Autenticando no GitHub Container Registry"
-    echo {{ $github_token }} | docker login {{ $registry }} -u {{ $github_username }} --password-stdin
-
-    echo ">> Autenticação realizada com sucesso"
-@endtask
-
-
-@task('pull_image', ['on' => $servers, 'parallel' => true])
+@task('deploy:validate', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
-    docker compose pull
-@endtask
 
+{{-- VERIFICAR A VERSAI EM USO NO CONTAINER APP --}}
 
-@task('up_services', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
-    docker compose up -d
-    docker ps
-@endtask
+    echo ">> Verificando se existe nova versão para deploy"
 
-
-@task('up_app', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
-    docker compose up -d {{ $app_services }}
-@endtask
-
-
-{{--  --}}
-{{--  --}}
-{{--  --}}
-{{--  --}}
-
-
-@task('set_deploy_env_tag', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
+    docker network inspect matrix_network >/dev/null 2>&1 || {
+      echo "❌ Network matrix_network não existe"
+      exit 1
+    }
 
     DEPLOY_TAG="{{ $tag }}"
 
     if [ "$DEPLOY_TAG" = "latest" ]; then
-        echo ">> Tag 'latest' detectada, buscando última versão do git"
-        DEPLOY_TAG=$(git describe --tags --abbrev=0 --exclude latest --exclude "*alpha*" --exclude "*beta*" --exclude "*rc*" --exclude "*dev*" --exclude "*pre*" --exclude "*alfa*" 2>/dev/null || echo "latest")
-        echo ">> Usando tag: ${DEPLOY_TAG}"
+        echo ">> Buscando última versão do git"
+        git fetch origin --prune --tags --force
+        DEPLOY_TAG=$(git tag | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+        echo ">> Tag encontrada: ${DEPLOY_TAG}"
     fi
 
-    if grep -q "^APP_TAG=" .env 2>/dev/null; then
-        sed -i "s|^APP_TAG=.*|APP_TAG=${DEPLOY_TAG}|" .env
-    else
-        echo "APP_TAG=${DEPLOY_TAG}" >> .env
+    if [ "$DEPLOY_TAG" = "" ]; then
+        echo "❌ Erro: --tag nao definida"
+        exit 1
     fi
 
-    if grep -q "^NGINX_TAG=" .env 2>/dev/null; then
-        sed -i "s|^NGINX_TAG=.*|NGINX_TAG=${DEPLOY_TAG}|" .env
-    else
-        echo "NGINX_TAG=${DEPLOY_TAG}" >> .env
+    if [ ! -f .env ]; then
+        echo ">> "
+        echo "❌ Erro: Arquivo .env não encontrado, primeira instalação será realizada"
+        exit 1
     fi
+
+    CURRENT_TAG=$(grep '^APP_TAG=' .env | cut -d'=' -f2 || echo "")
+
+    if [ -z "$CURRENT_TAG" ]; then
+        echo ">> "
+        echo "❌ Erro: Nenhuma versão atual encontrada, prosseguindo com deploy"
+        exit 1
+    fi
+
+    echo ">> Versão atual: ${CURRENT_TAG}"
+    echo ">> Versão alvo: ${DEPLOY_TAG}"
+
+    if [ "$CURRENT_TAG" = "$DEPLOY_TAG" ]; then
+        echo "✅ Versão já está atualizada, nenhuma ação necessária"
+        exit 1
+    fi
+
+    echo ">> Nova versão detectada, prosseguindo com deploy"
 @endtask
 
 
-@task('start_deployment', ['on' => $servers, 'parallel' => true])
+@task('deploy:stack', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+
+    cd {{ $path }}
+
+    DEPLOY_TAG="{{ $tag }}"
+    if [ "$DEPLOY_TAG" = "latest" ]; then
+        git fetch origin --prune --tags --force
+        DEPLOY_TAG=$(git tag | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+    fi
+
+    git fetch origin --prune --tags --force
+    git reset --hard $DEPLOY_TAG
+
+    echo ">> Repositório clonado/atualizado com sucesso (tag: $DEPLOY_TAG)"
+@endtask
+
+
+@task('deploy:up', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
     docker compose --env-file .env -f ./.docker/compose/deploy.yaml up -d
 @endtask
 
 
-@task('wait_deployment', ['on' => $servers, 'parallel' => true])
+@task('deploy:wait', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
 
@@ -548,29 +460,7 @@
 @endtask
 
 
-@task('switch_to_deployment', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
-
-    echo "server app_deployment:9000;" > ./.docker/nginx/app_upstream.conf
-
-    docker compose exec {{ $nginx_service }} nginx -t
-    docker compose exec {{ $nginx_service }} nginx -s reload
-@endtask
-
-
-@task('switch_back_to_app', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
-
-    echo "server app:9000;" > ./.docker/nginx/app_upstream.conf
-
-    docker compose exec {{ $nginx_service }} nginx -t
-    docker compose exec {{ $nginx_service }} nginx -s reload
-@endtask
-
-
-@task('remove_deployment', ['on' => $servers, 'parallel' => true])
+@task('deploy:down', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
     docker compose --env-file .env -f ./.docker/compose/deploy.yaml stop app_deployment || true
@@ -578,46 +468,32 @@
 @endtask
 
 
-{{--  --}}
-{{--  --}}
-{{--  --}}
-{{--  --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- HISTORY --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
 
-parei aqui
-@task('rollback_stack', ['on' => $servers, 'parallel' => true])
+
+@task('history:save', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
 
-    if [ ! -f {{ $deploy_history }} ] || [ ! -s {{ $deploy_history }} ]; then
-        echo ">> Erro: Nenhum histórico de deploy encontrado"
-        exit 1
-    fi
+    echo ">> Salvando versão atual antes do deploy"
 
-    ROLLBACK_TAG=$(tail -n 1 {{ $deploy_history }})
-
-    echo ">> Fazendo rollback para tag: ${ROLLBACK_TAG}"
-    git fetch origin --prune --tags --force
-    git reset --hard "${ROLLBACK_TAG}"
-@endtask
-
-
-@task('set_rollback_env_tag', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
-    cd {{ $path }}
-
-    ROLLBACK_TAG=$(tail -n 1 {{ $deploy_history }})
-
-    echo ">> Atualizando variáveis de ambiente"
-    if grep -q "^APP_TAG=" .env 2>/dev/null; then
-        sed -i "s|^APP_TAG=.*|APP_TAG=${ROLLBACK_TAG}|" .env
-    fi
-
-    if grep -q "^NGINX_TAG=" .env 2>/dev/null; then
-        sed -i "s|^NGINX_TAG=.*|NGINX_TAG=${ROLLBACK_TAG}|" .env
+    if [ -f .env ]; then
+        CURRENT_TAG=$(grep '^APP_TAG=' .env | cut -d'=' -f2)
+        if [ -n "$CURRENT_TAG" ]; then
+            echo "${CURRENT_TAG}" >> {{ $deploy_history }}
+            echo ">> Versão atual adicionada ao histórico: ${CURRENT_TAG}"
+        else
+            echo ">> Nenhuma tag encontrada no .env"
+        fi
+    else
+        echo ">> Arquivo .env não encontrado, primeira instalação"
     fi
 @endtask
 
-@task('remove_previous_tag_history', ['on' => $servers, 'parallel' => true])
+
+@task('history:pop', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
 
     if [ -f {{ $deploy_history }} ]; then
@@ -629,13 +505,157 @@ parei aqui
 @endtask
 
 
-{{--  --}}
-{{--  --}}
-{{--  --}}
-{{--  --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- ENV --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+
+@task('env:config', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+
+    cd {{ $path }}
+
+    echo ">> Criando arquivo .env a partir de .env.prod.example"
+    cp .env.prod.example .env
+
+    echo ">> Configurando WWWUSER e WWWGROUP"
+    set_env WWWUSER "$(id -u)"
+    set_env WWWGROUP "$(id -g)"
+
+    echo ">> Configurando APP_HOST"
+    set_env APP_HOST "{{ $domain }}"
+
+    echo ">> Configurando APP_SCHEMA"
+    set_env APP_SCHEMA "{{ $schema }}"
+
+    echo ">> Gerando DB_PASSWORD se necessário"
+    set_env DB_PASSWORD "$(openssl rand -hex 16)"
+
+    echo ">> Arquivo .env configurado com sucesso"
+@endtask
 
 
-@task('rollback_database', ['on' => $servers, 'parallel' => true])
+@task('env:set-deploy-tag', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+    cd {{ $path }}
+
+    DEPLOY_TAG="{{ $tag }}"
+    if [ "$DEPLOY_TAG" = "latest" ]; then
+        DEPLOY_TAG=$(git tag | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+    fi
+
+    set_env APP_TAG "${DEPLOY_TAG}"
+    set_env NGINX_TAG "${DEPLOY_TAG}"
+@endtask
+
+
+@task('env:set-rollback-tag', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/functions.sh' ?>
+
+    cd {{ $path }}
+
+    ROLLBACK_TAG=$(tail -n 1 {{ $deploy_history }})
+
+    set_env APP_TAG "${ROLLBACK_TAG}"
+    set_env NGINX_TAG "${ROLLBACK_TAG}"
+@endtask
+
+
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- IMAGE --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+
+
+@task('services:pull', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+    docker compose pull
+@endtask
+
+
+@task('services:up', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+    docker compose up -d
+    docker ps
+@endtask
+
+
+@task('app:up', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+    docker compose up -d --no-deps {{ $app_service }}
+@endtask
+
+
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- NGINX --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+
+
+@task('nginx:use-deploy', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+
+    docker compose exec -T {{ $nginx_service }} sed -i "s|[a-zA-Z_\-]+:|app_deployment:|" "/etc/nginx/conf.d/upstreams.conf"
+    docker compose exec -T {{ $nginx_service }} nginx -t
+    docker compose exec -T {{ $nginx_service }} nginx -s reload
+@endtask
+
+
+@task('nginx:use-app', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+
+    docker compose exec -T {{ $nginx_service }} sed -i "s|[a-zA-Z_\-]+:|app:|" "/etc/nginx/conf.d/upstreams.conf"
+    docker compose exec -T {{ $nginx_service }} nginx -t
+    docker compose exec -T {{ $nginx_service }} nginx -s reload
+@endtask
+
+
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- ROLLBACK --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+
+
+@task('rollback:validate', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+
+    if [ ! -f {{ $deploy_history }} ] || [ ! -s {{ $deploy_history }} ]; then
+        echo "❌ Erro: Nenhum arquivo de histórico de deploy encontrado"
+        exit 1
+    fi
+
+    ROLLBACK_TAG=$(tail -n 1 {{ $deploy_history }})
+
+    if [ "$ROLLBACK_TAG" = "" ]; then
+        echo "❌ Erro: Nenhum histórico de deploy encontrado"
+        exit 1
+    fi
+@endtask
+
+
+@task('rollback:stack', ['on' => $servers, 'parallel' => true])
+    set -euo pipefail
+    cd {{ $path }}
+
+    ROLLBACK_TAG=$(tail -n 1 {{ $deploy_history }})
+
+    echo ">> Fazendo rollback para tag: ${ROLLBACK_TAG}"
+    git fetch origin --prune --tags --force
+    git reset --hard "${ROLLBACK_TAG}"
+@endtask
+
+
+{{--------------------------------------------------------------------------------------------------------------------}}
+{{-- DB --}}
+{{--------------------------------------------------------------------------------------------------------------------}}
+
+
+@task('db:rollback', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
 
@@ -647,7 +667,7 @@ parei aqui
 @endtask
 
 
-@task('backup_database', ['on' => $servers, 'parallel' => true])
+@task('db:backup', ['on' => $servers, 'parallel' => true])
     set -euo pipefail
     cd {{ $path }}
 
@@ -655,13 +675,12 @@ parei aqui
 @endtask
 
 
-@task('restore_database', ['on' => $servers, 'parallel' => false])
+@task('db:restore', ['on' => $servers, 'parallel' => false])
     set -euo pipefail
     cd {{ $path }}
 
 {{--  comando para realizar o restauro  --}}
 @endtask
-
 
 
 @formatter:on

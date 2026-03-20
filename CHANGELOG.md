@@ -1,3 +1,7 @@
+## 2026.3.4 - 2026-03-20
+
+- Refactor Docker configurations and deployment scripts
+
 ## 2026.3.3 - 2026-03-19
 
 - Refactor Envoy deployment scripts for improved reliability and modularity
