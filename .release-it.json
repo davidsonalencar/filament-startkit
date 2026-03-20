@@ -11,13 +11,16 @@
     "npm": false,
     "hooks": {
         "after:bump": [
-            "echo ${version} > VERSION",
-            "git add VERSION",
             "vendor/bin/envoy run release:stack --tag=${version}",
             "vendor/bin/envoy run release:images --tag=${version}"
         ]
     },
     "plugins": {
+        "@release-it/bumper": {
+            "out": [
+                "VERSION"
+            ]
+        },
         "@release-it/conventional-changelog": {
             "infile": "CHANGELOG.md",
             "preset": {
