@@ -1,5 +1,7 @@
 # Changelog
 
+* chore: update release-it config to refine bumper plugin and changelog sections (ea089d3)
+
 ## [2026.3.6](https://github.com/davidsonalencar/filament-startkit/compare/2026.3.5...v2026.3.6) (2026-03-20)
 
 ## 2026.3.5 (2026-03-20)

@@ -16,7 +16,8 @@
     },
     "plugins": {
         "@release-it/bumper": {
-            "versionFile": "VERSION"
+            "in": "VERSION",
+            "out": "VERSION"
         },
         "@release-it/conventional-changelog": {
             "infile": "CHANGELOG.md",
