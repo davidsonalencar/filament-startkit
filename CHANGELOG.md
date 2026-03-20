@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026.3.7](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.6...v2026.3.7) (2026-03-20)
+
+### Outras Melhorias
+
+* refine release-it bumper plugin config to include `in` and `out` properties ([25dcf81](https://github.com/davidsonalencar/filament-startkit/commit/25dcf81c255dcd1fff9ce11a2e1796064f89017e))
+* release v2026.3.6 ([563629e](https://github.com/davidsonalencar/filament-startkit/commit/563629e34dba7ac385835e84b935cdef2f703765))
+* update release-it config to refine bumper plugin and changelog sections ([ea089d3](https://github.com/davidsonalencar/filament-startkit/commit/ea089d3909049c702ce40bbdab8d3ff7c2aa692c))
+
 * chore: refine release-it bumper plugin config to include `in` and `out` properties (25dcf81)
 * chore: update release-it config to refine bumper plugin and changelog sections (ea089d3)
 
