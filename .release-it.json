@@ -2,15 +2,71 @@
     "git": {
         "commitMessage": "chore: release v${version}",
         "tagName": "v${version}",
-        "requireCleanWorkingDir": true
+        "requireCleanWorkingDir": true,
+        "addUntrackedFiles": true
     },
     "github": {
         "release": true
     },
+    "hooks": {
+        "after:bump": [
+            "echo ${version} > VERSION",
+            "vendor/bin/envoy run release:stack --tag=${version}",
+            "vendor/bin/envoy run release:images --tag=${version}"
+        ]
+    },
     "plugins": {
         "@release-it/conventional-changelog": {
-            "preset": "conventionalcommits",
-            "infile": "CHANGELOG.md"
+            "infile": "CHANGELOG.md",
+            "preset": {
+                "name": "conventionalcommits",
+                "types": [
+                    {
+                        "type": "feat",
+                        "section": "Nova Funcionalidade"
+                    },
+                    {
+                        "type": "fix",
+                        "section": "Correção de Bug"
+                    },
+                    {
+                        "type": "docs",
+                        "hidden": true
+                    },
+                    {
+                        "type": "style",
+                        "section": "Estilo e Formatação"
+                    },
+                    {
+                        "type": "refactor",
+                        "hidden": true
+                    },
+                    {
+                        "type": "test",
+                        "hidden": true
+                    },
+                    {
+                        "type": "chore",
+                        "hidden": true
+                    },
+                    {
+                        "type": "build",
+                        "hidden": true
+                    },
+                    {
+                        "type": "ci",
+                        "hidden": true
+                    },
+                    {
+                        "type": "perf",
+                        "section": "Melhorias de Desempenho"
+                    },
+                    {
+                        "type": "revert",
+                        "hidden": true
+                    }
+                ]
+            }
         }
     }
 }
