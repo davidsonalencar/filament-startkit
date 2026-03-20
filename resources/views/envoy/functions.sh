@@ -18,15 +18,3 @@ set_env() {
         echo "${key}=${value}" >> "$file"
     fi
 }
-
-set_upstream() {
-    local host="$1"
-    local port="${2:-9000}"
-    local file="${3:-./.docker/nginx/app_upstream.conf}"
-    local tmp
-    tmp=$(mktemp)
-
-    sed "s/[a-zA-Z_\-]:[0-9]+/${host}:${port}/" "$file" > "$tmp" && cat "$tmp" > "$file"
-
-    rm -f "$tmp"
-}

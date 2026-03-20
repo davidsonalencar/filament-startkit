@@ -224,7 +224,7 @@
     git checkout main || git checkout -b main
 
     echo ">> Preparando arquivos do stack"
-    mkdir -p .docker/scripts .docker/nginx
+    mkdir -p .docker/scripts
 
     cp -Rf "$CURR_DIR/.docker/compose/." .docker/compose/
     cp -Rf "$CURR_DIR/.env.prod.example" .
