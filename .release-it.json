@@ -8,10 +8,7 @@
     "github": {
         "release": true
     },
-    "npm": {
-        "publish": false,
-        "versionArgs": []
-    },
+    "npm": false,
     "hooks": {
         "after:bump": [
             "echo ${version} > VERSION",
