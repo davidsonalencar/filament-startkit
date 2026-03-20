@@ -12,6 +12,7 @@
     "hooks": {
         "after:bump": [
             "echo ${version} > VERSION",
+            "git add VERSION",
             "vendor/bin/envoy run release:stack --tag=${version}",
             "vendor/bin/envoy run release:images --tag=${version}"
         ]
