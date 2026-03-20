@@ -1,3 +1,13 @@
+# Changelog
+
+## [2026.3.6](https://github.com/davidsonalencar/filament-startkit/compare/2026.3.5...v2026.3.6) (2026-03-20)
+
+## 2026.3.5 (2026-03-20)
+
+## 2026.3.4 (2026-03-20)
+
+## 2026.3.3 (2026-03-19)
+
 ## 2026.3.5 - 2026-03-20
 
 - chore: remove unused upstream setup function and simplify stack preparation
