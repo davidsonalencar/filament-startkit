@@ -51,7 +51,6 @@
 
 
 @story('release', ['on' => 'local'])
-    release:app
     release:stack
     release:images
 @endstory
@@ -101,110 +100,6 @@
 {{--------------------------------------------------------------------------------------------------------------------}}
 {{-- RELEASE  --}}
 {{--------------------------------------------------------------------------------------------------------------------}}
-
-
-@task('release:app', ['on' => 'local'])
-    <?php require __DIR__.'/resources/views/envoy/git.sh' ?>
-
-    VERSION_OPTION={{ $tag }}
-
-    echo "🔍 Buscando última tag..."
-
-    LAST_TAG=$(get_last_release_tag)
-
-    if [ -z "$LAST_TAG" ]; then
-      echo "⚠️ Nenhuma tag encontrada. Usando todos os commits."
-      COMMITS=$(git log --pretty=format:'%s')
-    else
-      echo "📌 Última tag: $LAST_TAG"
-      COMMITS=$(git log "$LAST_TAG"..HEAD --pretty=format:'%s')
-    fi
-
-    if [ -z "$COMMITS" ]; then
-      echo "⚠️ Sem commits novos."
-      exit 1
-    fi
-
-    # -------------------------------
-    # 🔢 BUMP DE VERSÃO
-    # -------------------------------
-
-    YEAR=$(date +%Y)
-    MONTH=$(date +%-m)
-
-    if [ "$VERSION_OPTION" != "latest" ]; then
-      NEW_VERSION=$VERSION_OPTION
-    else
-      if [ -z "$LAST_TAG" ]; then
-        NEW_VERSION="$YEAR.$MONTH.1"
-      else
-        # remove prefixo v
-        CLEAN_TAG=${LAST_TAG#v}
-
-        IFS='.' read -r VYEAR VMONTH VPATCH <<< "$CLEAN_TAG"
-
-        if [ "$VYEAR" = "$YEAR" ] && [ "$VMONTH" = "$MONTH" ]; then
-          NEW_VERSION="$YEAR.$MONTH.$((VPATCH + 1))"
-        else
-          NEW_VERSION="$YEAR.$MONTH.1"
-        fi
-      fi
-    fi
-
-    echo "🚀 Nova versão: $NEW_VERSION"
-
-    # -------------------------------
-    # 📄 ATUALIZA VERSION
-    # -------------------------------
-
-    echo "$NEW_VERSION" > VERSION
-
-    # -------------------------------
-    # 📝 CHANGELOG
-    # -------------------------------
-
-    if [[ ! "$NEW_VERSION" =~ (alpha|beta|rc|dev|pre|alfa) ]]; then
-        DATE=$(date +%Y-%m-%d)
-
-        CHANGELOG_CONTENT="## $NEW_VERSION - $DATE\n\n"
-
-        while IFS= read -r line; do
-          CHANGELOG_CONTENT="$CHANGELOG_CONTENT- $line\n"
-        done <<< "$COMMITS"
-
-        CHANGELOG_CONTENT="$CHANGELOG_CONTENT\n"
-
-        if [ -f CHANGELOG.md ]; then
-          echo "$CHANGELOG_CONTENT$(cat CHANGELOG.md)" > CHANGELOG.md
-        else
-          echo "$CHANGELOG_CONTENT" > CHANGELOG.md
-        fi
-    else
-        echo "❌ Versão de pré-release detectada. Changelogs não alterado."
-    fi
-
-    # -------------------------------
-    # 📦 COMMIT + TAG
-    # -------------------------------
-
-    git add VERSION CHANGELOG.md
-    git commit -m "chore(release): $NEW_VERSION"
-    git tag "$NEW_VERSION"
-
-    if [[ ! "$NEW_VERSION" =~ (alpha|beta|rc|dev|pre|alfa) ]]; then
-        git tag -a "latest" -m "Latest release -> ${NEW_VERSION}" -f
-    fi
-
-    # -------------------------------
-    # 🚀 PUSH
-    # -------------------------------
-
-    git push origin HEAD
-    git push --tags --force
-
-    echo "✅ Release criada com sucesso!"
-
-@endtask
 
 
 @task('release:stack', ['on' => 'local'])
