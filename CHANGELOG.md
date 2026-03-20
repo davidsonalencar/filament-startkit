@@ -1,3 +1,7 @@
+## 2026.3.5 - 2026-03-20
+
+- chore: remove unused upstream setup function and simplify stack preparation
+
 ## 2026.3.4 - 2026-03-20
 
 - Refactor Docker configurations and deployment scripts
