@@ -155,6 +155,9 @@ if [ "$SETUP_STACKS_DIR" = "1" ] && [ -d "$STACKS_DIR" ]; then
   run find "$STACKS_DIR" -type f -exec chmod 644 {} \;
 fi
 
+echo "Login Git Packages"
+docker login ghcr.io
+
 echo "DEPLOY_USER=$DEPLOY_USER"
 echo "HOME_DIR=$HOME_DIR"
 echo "SSH_DIR=$SSH_DIR"

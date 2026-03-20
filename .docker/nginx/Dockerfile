@@ -10,7 +10,6 @@ WORKDIR /var/www/html
 RUN mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.disabled 2>/dev/null || true
 
 COPY ./.docker/nginx/default.conf.tpl /etc/nginx/.
-COPY ./.docker/nginx/app_upstream.conf /etc/nginx/.
 
 COPY ./.docker/nginx/start-container /usr/local/bin/start-container
 RUN chmod +x /usr/local/bin/start-container

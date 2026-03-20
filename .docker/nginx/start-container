@@ -22,7 +22,7 @@ run_create_upstreams_conf() {
 
     cat > /etc/nginx/conf.d/upstreams.conf <<'EOF'
 upstream app_backend {
-    include /etc/nginx/app_upstream.conf;
+    server app:9000;
 }
 
 upstream reverb_backend {
