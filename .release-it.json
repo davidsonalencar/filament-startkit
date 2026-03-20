@@ -16,9 +16,7 @@
     },
     "plugins": {
         "@release-it/bumper": {
-            "out": [
-                "VERSION"
-            ]
+            "versionFile": "VERSION"
         },
         "@release-it/conventional-changelog": {
             "infile": "CHANGELOG.md",
@@ -51,7 +49,7 @@
                     },
                     {
                         "type": "chore",
-                        "hidden": true
+                        "section": "Outras Melhorias"
                     },
                     {
                         "type": "build",
