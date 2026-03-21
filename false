@@ -1,0 +1,8 @@
+
+
+## [2026.3.14-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.13...v2026.3.14-pr.0) (2026-03-21)
+
+### Outras Melhorias
+
+* fix release-it config to properly disable changelog plugins in pre-releases ([946b767](https://github.com/davidsonalencar/filament-startkit/commit/946b7677f1963ab3e0430e432a625c9ac2e45725))
+* refine release-it pre-release config to disable changelog file and header ([7a66bd4](https://github.com/davidsonalencar/filament-startkit/commit/7a66bd47e9af5b09fa93e66cb70bb24fd5885d93))
