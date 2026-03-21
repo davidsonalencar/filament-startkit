@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.12-pr.2](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.12-pr.1...v2026.3.12-pr.2) (2026-03-21)
+
+### Outras Melhorias
+
+* remove `release:images` task from post-bump hooks in release-it config for tests ([ded8d18](https://github.com/davidsonalencar/filament-startkit/commit/ded8d18b1adbecbe121a9e0e27c06305fc986937))
+
 ## [2026.3.12-pr.1](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.12-pr.0...v2026.3.12-pr.1) (2026-03-21)
 
 ## [2026.3.12-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.11...v2026.3.12-pr.0) (2026-03-21)
