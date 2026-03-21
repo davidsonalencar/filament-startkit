@@ -4,16 +4,16 @@
 
 ### Outras Melhorias
 
-* release v2026.3.14-pr.1 ([2eea66f](https://github.com/davidsonalencar/filament-startkit/commit/2eea66fd575c8eecadca757c81fa311d7e3eefd7))
-* update release-it config to use `--no-plugins` syntax for pre-releases ([b2a937f](https://github.com/davidsonalencar/filament-startkit/commit/b2a937f57d78afdc87ba740349ed4c392d148dec))
-
-## [2026.3.14-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.13...v2026.3.14) (2026-03-21)
-
-### Outras Melhorias
-
-* fix release-it config to properly disable changelog plugins in pre-releases ([946b767](https://github.com/davidsonalencar/filament-startkit/commit/946b7677f1963ab3e0430e432a625c9ac2e45725))
-* refine release-it pre-release config to disable changelog file and header ([7a66bd4](https://github.com/davidsonalencar/filament-startkit/commit/7a66bd47e9af5b09fa93e66cb70bb24fd5885d93))
-* release v2026.3.14-pr.0 ([7b4b60d](https://github.com/davidsonalencar/filament-startkit/commit/7b4b60d7e4ff8d0ebf98b77d45227e6f49db7c20))
+* release
+  v2026.3.14-pr.1 ([2eea66f](https://github.com/davidsonalencar/filament-startkit/commit/2eea66fd575c8eecadca757c81fa311d7e3eefd7))
+* update release-it config to use `--no-plugins` syntax for
+  pre-releases ([b2a937f](https://github.com/davidsonalencar/filament-startkit/commit/b2a937f57d78afdc87ba740349ed4c392d148dec))
+* fix release-it config to properly disable changelog plugins in
+  pre-releases ([946b767](https://github.com/davidsonalencar/filament-startkit/commit/946b7677f1963ab3e0430e432a625c9ac2e45725))
+* refine release-it pre-release config to disable changelog file and
+  header ([7a66bd4](https://github.com/davidsonalencar/filament-startkit/commit/7a66bd47e9af5b09fa93e66cb70bb24fd5885d93))
+* release
+  v2026.3.14-pr.0 ([7b4b60d](https://github.com/davidsonalencar/filament-startkit/commit/7b4b60d7e4ff8d0ebf98b77d45227e6f49db7c20))
 
 ## [2026.3.13](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.12...v2026.3.13) (2026-03-21)
 
