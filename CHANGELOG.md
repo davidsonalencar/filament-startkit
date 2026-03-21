@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026.3.16-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.16-pr.0) (2026-03-21)
+
+### Outras Melhorias
+
+* update release-it config and scripts for improved pre-release handling ([d1e8ac1](https://github.com/davidsonalencar/filament-startkit/commit/d1e8ac11d753414e9ee151dfaf5213f1b5ebe226))
+* update release-it config and scripts for improved pre-release handling ([ab24dc0](https://github.com/davidsonalencar/filament-startkit/commit/ab24dc0121eebdb87a79604901c6b2ddb16db5a4))
+
 ## [2026.3.15](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.14...v2026.3.15) (2026-03-21)
 
 ### Outras Melhorias
