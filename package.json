@@ -10,14 +10,14 @@
         "dev": "npm run dev:admin & npm run dev:app",
         "build": "npm run build:app && npm run build:admin",
         "prepare": "husky",
-        "release": "release-it --config .release-it.js --ci --git.tagExclude='*[-]*'",
-        "release:major": "release-it --config .release-it.js --ci major --git.tagExclude='*[-]*'",
-        "release:minor": "release-it --config .release-it.js --ci minor --git.tagExclude='*[-]*'",
-        "release:patch": "release-it --config .release-it.js --ci patch --git.tagExclude='*[-]*'",
-        "release:pr": "release-it --config .release-it.js --ci --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header",
-        "release:pr:major": "release-it --config .release-it.js --ci major --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header",
-        "release:pr:minor": "release-it --config .release-it.js --ci minor --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header",
-        "release:pr:patch": "release-it --config .release-it.js --ci patch --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header"
+        "release": "release-it --ci --git.tagExclude='*[-]*'",
+        "release:major": "release-it --ci major --git.tagExclude='*[-]*'",
+        "release:minor": "release-it --ci minor --git.tagExclude='*[-]*'",
+        "release:patch": "release-it --ci patch --git.tagExclude='*[-]*'",
+        "release:pr": "release-it --ci --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header",
+        "release:pr:major": "release-it --ci major --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header",
+        "release:pr:minor": "release-it --ci minor --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header",
+        "release:pr:patch": "release-it --ci patch --preRelease=pr --no-plugins.@release-it/conventional-changelog.infile --no-plugins.@release-it/conventional-changelog.header"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",

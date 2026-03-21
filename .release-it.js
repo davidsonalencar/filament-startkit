@@ -37,8 +37,9 @@ module.exports = {
     hooks: {
         'after:bump': [
             'vendor/bin/envoy run release:stack --tag=${version}',
-            'echo ">> SAAAAAAAAA"',
-            
+            'echo ">> Stack publicado com sucesso"',
+            'node -e "const fs=require(\'fs\'); const file=\'CHANGELOG.md\'; if(fs.existsSync(file)){ let c=fs.readFileSync(file,\'utf8\'); c=c.replace(/^##\\s+\\[[^\\]]+-pr\\.\\d+\\][\\s\\S]*?(?=^##\\s+\\[|$)/gm,\'\').replace(/\\n{3,}/g,\'\\n\\n\').trimEnd()+\'\\n\'; fs.writeFileSync(file,c); }"',
+
         ],
     },
 
@@ -103,6 +104,9 @@ module.exports = {
                         hidden: true,
                     },
                 ],
+                writerOpts: {
+                    headerPartial: '## \n\n'
+                }
             },
         },
     },
