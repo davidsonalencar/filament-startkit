@@ -1,6 +1,5 @@
 @formatter:off
 
-
 @servers([
     'local' => '127.0.0.1',
     'app1' => 'deploy@195.200.0.186',
