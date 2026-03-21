@@ -208,14 +208,18 @@ FROM php-runtime AS production
 COPY --from=db-clients /usr/bin/mysql /usr/bin/mysql
 #COPY --from=db-clients /usr/bin/psql /usr/bin/psql
 
-# Copia projeto
+# Cópia do projeto
 COPY . .
-RUN rm -f bootstrap/cache/*.php
 COPY --from=composer-deps /var/www/html/vendor ./vendor
 COPY --from=node-build /var/www/html/public/build ./public/build
+
+# Arquivos relacionados ao Node.js removidos manualmente pois não são necessários na imagem de produção
+RUN rm -f package.json package-lock.json* pnpm-lock.yaml* yarn.lock* vite.*
+RUN rm -Rf .docker
 RUN rm -f ./public/hot
 RUN rm -f ./public/*.hot
 
+# Descobrir e registrar pacotes Laravel instalados via Composer
 RUN php artisan package:discover --ansi
 
 EXPOSE 9000/tcp

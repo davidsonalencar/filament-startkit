@@ -199,12 +199,12 @@ run_optimize_commands() {
     if [ -f "$APP_DIR/artisan" ] && [ "${RUN_OPTIMIZE:-1}" = "1" ]; then
         log "Executando comandos de otimização..."
 
+        run_as_app_user "php artisan optimize:clear || true"
+        #run_as_app_user "php artisan tenants:run optimize:clear || true"
+
         if [ "$APP_ENVIRONMENT" = "production" ]; then
             run_as_app_user "php artisan optimize || true"
-#           run_as_app_user "php artisan tenants:run optimize || true"
-        else
-            run_as_app_user "php artisan optimize:clear || true"
-#           run_as_app_user "php artisan tenants:run optimize:clear || true"
+            #run_as_app_user "php artisan tenants:run optimize || true"
         fi
     else
         log "Optimize desabilitado ou artisan não encontrado."
