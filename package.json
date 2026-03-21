@@ -14,7 +14,7 @@
         "release:major": "release-it --ci major --git.tagExclude='*[-]*'",
         "release:minor": "release-it --ci minor --git.tagExclude='*[-]*'",
         "release:patch": "release-it --ci patch --git.tagExclude='*[-]*'",
-        "release:pr": "release-it --ci --preRelease=pr",
+        "release:pr": "release-it --ci --preRelease=pr --changelog=false",
         "release:pr:major": "release-it --ci major --preRelease=pr --changelog=false",
         "release:pr:minor": "release-it --ci minor --preRelease=pr --changelog=false",
         "release:pr:patch": "release-it --ci patch --preRelease=pr --changelog=false"
