@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.12-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.11...v2026.3.12-pr.0) (2026-03-21)
+
+### Outras Melhorias
+
+* refactor Envoy scripts and release-it workflow for streamlined versioning and build processes ([cbbe4fb](https://github.com/davidsonalencar/filament-startkit/commit/cbbe4fba114301cbe75df77d38508f7fa605b826))
+
 ## [2026.3.11](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.10...v2026.3.11) (2026-03-21)
 
 ### Outras Melhorias

@@ -55,7 +55,7 @@ is_prerelease_tag() {
   lower="$(printf '%s' "$tag" | tr '[:upper:]' '[:lower:]')"
 
   case "$lower" in
-    *alpha*|*beta*|*rc*|*pr*|*dev*|*alfa*)
+    *-*)
       return 0
       ;;
     *)
