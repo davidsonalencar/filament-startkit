@@ -1,5 +1,7 @@
 XXXXXXXXXX
 
+## [2026.3.23](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.22...v2026.3.23) (2026-03-21)
+
 ## [2026.3.22](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.22) (2026-03-21)
 
 ### Outras Melhorias
