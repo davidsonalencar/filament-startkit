@@ -28,8 +28,3 @@ get_env() {
     [ -f "$file" ] || return 0
     grep "^${key}=" "$file" | tail -n 1 | cut -d'=' -f2-
 }
-
-ensure_env_file() {
-    local file="$1"
-    [ -f "$file" ] || fail "Arquivo de ambiente não encontrado: $file"
-}

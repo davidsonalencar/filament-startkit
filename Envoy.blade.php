@@ -47,13 +47,9 @@
     $deploy_history = "$path/.deploy_history.txt";
 
     $nginx_upstreams = "/etc/nginx/conf.d/upstreams.conf";
+
+    $i = $i ?? '';
 @endsetup
-
-
-@story('release', ['on' => 'local'])
-    release:stack
-    release:images
-@endstory
 
 
 @story('bootstrap', ['on' => $servers, 'parallel' => true])
@@ -152,20 +148,12 @@
 
 
 @task('release:images', ['on' => 'local'])
-    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/common.sh' ?>
 
     TAG="$(cat VERSION)"
     APP_IMAGE="{{ $app_image }}"
     NGINX_IMAGE="{{ $nginx_image }}"
-
-    LOWER_TAG=$(printf '%s' "$TAG" | tr '[:upper:]' '[:lower:]')
-
-    PUBLISH_LATEST=1
-    case "$LOWER_TAG" in
-      *stable*|*beta*|*dev*|*alpha*|*latest*)
-        PUBLISH_LATEST=0
-        ;;
-    esac
+    IS_PR=$(is_prerelease_tag "$TAG")
 
     # -------------------------
     # APP IMAGE
@@ -173,12 +161,8 @@
     echo ">> Building ${APP_IMAGE}:${TAG}"
 
     BUILD_TAGS="-t ${APP_IMAGE}:${TAG}"
-
-    if [ "$PUBLISH_LATEST" -eq 1 ]; then
-      echo ">> Também marcando como latest"
+    if [ "$IS_PR" -eq 1 ]; then
       BUILD_TAGS="$BUILD_TAGS -t ${APP_IMAGE}:latest"
-    else
-      echo ">> Tag contém stable, beta ou dev; não será marcado como latest"
     fi
 
     docker buildx build \
@@ -196,8 +180,7 @@
     echo ">> Building ${NGINX_IMAGE}:${TAG}"
 
     BUILD_TAGS_NGINX="-t ${NGINX_IMAGE}:${TAG}"
-
-    if [ "$PUBLISH_LATEST" -eq 1 ]; then
+    if [ "$IS_PR" -eq 1 ]; then
       BUILD_TAGS_NGINX="$BUILD_TAGS_NGINX -t ${NGINX_IMAGE}:latest"
     fi
 
@@ -280,15 +263,11 @@
 
 
 @task('deploy:stack', ['on' => $servers, 'parallel' => true])
-    set -euo pipefail
+    <?php require __DIR__.'/resources/views/envoy/git.sh' ?>
 
     cd {{ $path }}
 
-    DEPLOY_TAG="{{ $tag }}"
-    if [ "$DEPLOY_TAG" = "latest" ]; then
-        git fetch origin --prune --tags --force
-        DEPLOY_TAG=$(git tag | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-    fi
+    DEPLOY_TAG=$(resolve_version_tag "{{ $tag  }}")
 
     git fetch origin --prune --tags --force
     git reset --hard $DEPLOY_TAG
