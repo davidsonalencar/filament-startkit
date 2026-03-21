@@ -1,27 +1,48 @@
 XXXXXXXXXX
 
-## [2026.3.28](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.28) (2026-03-21)
+## [2026.3.29](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.29) (2026-03-21)
 
-## [2026.3.16-pr.3](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.28) (2026-03-21)
+## [2026.3.16-pr.3](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.29) (2026-03-21)
 
 ### Outras Melhorias
 
 * update release-it config to use external pre-release settings file ([6f6f3e2](https://github.com/davidsonalencar/filament-startkit/commit/6f6f3e274ef76e4a993ab2c63d4dcb74a7c29a54))
 
-## [2026.3.16-pr.2](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.28) (2026-03-21)
+## [2026.3.16-pr.2](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.29) (2026-03-21)
 
 ### Outras Melhorias
 
 * update release-it config to add success message after stack release ([4a870ec](https://github.com/davidsonalencar/filament-startkit/commit/4a870ecc5453af0ef1e67cb30749e9d5279af792))
 
-## [2026.3.16-pr.1](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.28) (2026-03-21)
+## [2026.3.16-pr.1](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.29) (2026-03-21)
 
 ### Outras Melhorias
 
 * adjust release-it config for updated commit message format and pre-release script behavior ([dbdecfd](https://github.com/davidsonalencar/filament-startkit/commit/dbdecfd8b21db0adcefd61829e6a24b5dbf6e969))
 * disable changelog generation for pre-releases in release-it config ([c935104](https://github.com/davidsonalencar/filament-startkit/commit/c9351047769d0e43494cfae29482ba5d0e7da638))
 
-## [2026.3.16-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.28) (2026-03-21)
+## [2026.3.16-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.29) (2026-03-21)
+
+### Outras Melhorias
+
+* release v2026.3.16-pr.0 ([2a09095](https://github.com/davidsonalencar/filament-startkit/commit/2a090957370a396b48b2a07a8a8136c3ca700c88))
+* update release-it config and scripts for improved pre-release handling ([d1e8ac1](https://github.com/davidsonalencar/filament-startkit/commit/d1e8ac11d753414e9ee151dfaf5213f1b5ebe226))
+* update release-it config and scripts for improved pre-release handling ([ab24dc0](https://github.com/davidsonalencar/filament-startkit/commit/ab24dc0121eebdb87a79604901c6b2ddb16db5a4))
+
+## [2026.3.28](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.28) (2026-03-21)
+
+### Outras Melhorias
+
+* update release-it config to use external pre-release settings file ([6f6f3e2](https://github.com/davidsonalencar/filament-startkit/commit/6f6f3e274ef76e4a993ab2c63d4dcb74a7c29a54))
+
+### Outras Melhorias
+
+* update release-it config to add success message after stack release ([4a870ec](https://github.com/davidsonalencar/filament-startkit/commit/4a870ecc5453af0ef1e67cb30749e9d5279af792))
+
+### Outras Melhorias
+
+* adjust release-it config for updated commit message format and pre-release script behavior ([dbdecfd](https://github.com/davidsonalencar/filament-startkit/commit/dbdecfd8b21db0adcefd61829e6a24b5dbf6e969))
+* disable changelog generation for pre-releases in release-it config ([c935104](https://github.com/davidsonalencar/filament-startkit/commit/c9351047769d0e43494cfae29482ba5d0e7da638))
 
 ### Outras Melhorias
 
