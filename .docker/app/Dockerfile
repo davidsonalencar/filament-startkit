@@ -210,6 +210,7 @@ COPY --from=db-clients /usr/bin/mysql /usr/bin/mysql
 
 # Copia projeto
 COPY . .
+RUN rm -f bootstrap/cache/*.php
 COPY --from=composer-deps /var/www/html/vendor ./vendor
 COPY --from=node-build /var/www/html/public/build ./public/build
 RUN rm -f ./public/hot
