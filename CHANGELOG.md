@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026.3.10](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.8...v2026.3.10) (2026-03-21)
+
+### Outras Melhorias
+
+* add `--no-dev` flag to composer install in Dockerfile ([40fd03c](https://github.com/davidsonalencar/filament-startkit/commit/40fd03c9628cf03a058471a9cb20bda6406ef805))
+* add `release:image` task to post-bump hooks in release-it config ([c64fe5e](https://github.com/davidsonalencar/filament-startkit/commit/c64fe5e0d67e9ee01121e89f4e84a58aaf72dea9))
+* add `release:images` task to post-bump hooks in release-it config ([c4d8734](https://github.com/davidsonalencar/filament-startkit/commit/c4d873447ea4ea5e91a5885e34a4eb7f3a0e4212))
+* clear PHP cache files in Dockerfile during build ([acc33be](https://github.com/davidsonalencar/filament-startkit/commit/acc33be31b6d401965bc10087bf34512b0f339c4))
+
 ## [2026.3.8](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.7...v2026.3.8) (2026-03-20)
 
 ### Outras Melhorias
