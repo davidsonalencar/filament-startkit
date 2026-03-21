@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026.3.11](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.10...v2026.3.11) (2026-03-21)
+
+### Outras Melhorias
+
+* update Dockerfile and .dockerignore for optimized builds and cleanup ([3437a1c](https://github.com/davidsonalencar/filament-startkit/commit/3437a1cf885eff451cf074a65cd2ac115f6880ae))
+* update release-it script to use CI mode ([ccbb6c7](https://github.com/davidsonalencar/filament-startkit/commit/ccbb6c793f468a38d05221a438eeb39b7f4f0805))
+
 ## [2026.3.10](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.8...v2026.3.10) (2026-03-21)
 
 ### Outras Melhorias
