@@ -1,5 +1,7 @@
 # Changelog
 
+## [2026.3.12-pr.1](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.12-pr.0...v2026.3.12-pr.1) (2026-03-21)
+
 ## [2026.3.12-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.11...v2026.3.12-pr.0) (2026-03-21)
 
 ### Outras Melhorias
