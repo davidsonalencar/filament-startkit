@@ -10,7 +10,7 @@
         "dev": "npm run dev:admin & npm run dev:app",
         "build": "npm run build:app && npm run build:admin",
         "prepare": "husky",
-        "release": "release-it"
+        "release": "release-it --ci"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",
