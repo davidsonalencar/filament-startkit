@@ -1,5 +1,25 @@
 # Changelog
 
+## [2026.3.12](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.11...v2026.3.12) (2026-03-21)
+
+### Outras Melhorias
+
+* release v2026.3.12-pr.2 ([a1c2ef6](https://github.com/davidsonalencar/filament-startkit/commit/a1c2ef65ddc622ed63ba61a5a894564f408dd930))
+* remove `release:images` task from post-bump hooks in release-it config for tests ([ded8d18](https://github.com/davidsonalencar/filament-startkit/commit/ded8d18b1adbecbe121a9e0e27c06305fc986937))
+
+## [2026.3.12-pr.1](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.11...v2026.3.12) (2026-03-21)
+
+### Outras Melhorias
+
+* release v2026.3.12-pr.1 ([c48fce3](https://github.com/davidsonalencar/filament-startkit/commit/c48fce38ec0ecf04a76c322a43dea516f7753c27))
+
+## [2026.3.12-pr.0](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.11...v2026.3.12) (2026-03-21)
+
+### Outras Melhorias
+
+* refactor Envoy scripts and release-it workflow for streamlined versioning and build processes ([cbbe4fb](https://github.com/davidsonalencar/filament-startkit/commit/cbbe4fba114301cbe75df77d38508f7fa605b826))
+* release v2026.3.12-pr.0 ([bb5c267](https://github.com/davidsonalencar/filament-startkit/commit/bb5c267e262848793d42197be083db1e22741c90))
+
 ## [2026.3.12-pr.2](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.12-pr.1...v2026.3.12-pr.2) (2026-03-21)
 
 ### Outras Melhorias
