@@ -13,9 +13,9 @@
         "release": "release-it --ci --git.tagExclude='*[-]*'",
         "release:major": "release-it major --ci --git.tagExclude='*[-]*'",
         "release:minor": "release-it minor --ci --git.tagExclude='*[-]*'",
-        "release:pr": "release-it --ci --preRelease=pr --plugins.@release-it/conventional-changelog=false",
-        "release:pr:major": "release-it major --ci --preRelease=pr --plugins.@release-it/conventional-changelog=false",
-        "release:pr:minor": "release-it minor --ci --preRelease=pr --plugins.@release-it/conventional-changelog=false"
+        "release:pr": "release-it --ci --preRelease=pr --plugins.@release-it/conventional-changelog.infile=null",
+        "release:pr:major": "release-it major --ci --preRelease=pr --plugins.@release-it/conventional-changelog.infile=null",
+        "release:pr:minor": "release-it minor --ci --preRelease=pr --plugins.@release-it/conventional-changelog.infile=null"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",
