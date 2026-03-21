@@ -1,0 +1,8 @@
+# Changelog
+
+## [2026.3.13-pr.1](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.13-pr.0...v2026.3.13-pr.1) (2026-03-21)
+
+### Outras Melhorias
+
+* update release-it config to disable changelog file generation during pre-releases ([5e299e4](https://github.com/davidsonalencar/filament-startkit/commit/5e299e4c20b16169a4a0a1b33c7b1f9f1ff7beff))
+* update release-it config to use `infile=null` for pre-releases ([83b59e4](https://github.com/davidsonalencar/filament-startkit/commit/83b59e44a58f2abf152fe9be5ce78eeebe32b543))
