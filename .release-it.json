@@ -2,7 +2,7 @@
     "git": {
         "commitMessage": "release: release v${version}",
         "tagName": "v${version}",
-        "requireCleanWorkingDir": false
+        "requireCleanWorkingDir": true
     },
     "github": {
         "release": true
@@ -10,7 +10,8 @@
     "npm": false,
     "hooks": {
         "after:bump": [
-            "vendor/bin/envoy run release:stack --tag=${version}"
+            "vendor/bin/envoy run release:stack --tag=${version}",
+            "vendor/bin/envoy run release:images --tag=${version}"
         ]
     },
     "plugins": {
