@@ -153,7 +153,6 @@
     TAG="$(cat VERSION)"
     APP_IMAGE="{{ $app_image }}"
     NGINX_IMAGE="{{ $nginx_image }}"
-    IS_PR=$(is_prerelease_tag "$TAG")
 
     # -------------------------
     # APP IMAGE
@@ -161,7 +160,7 @@
     echo ">> Building ${APP_IMAGE}:${TAG}"
 
     BUILD_TAGS="-t ${APP_IMAGE}:${TAG}"
-    if [ "$IS_PR" -eq 1 ]; then
+    if ! is_prerelease_tag "$TAG"; then
       BUILD_TAGS="$BUILD_TAGS -t ${APP_IMAGE}:latest"
     fi
 
@@ -180,7 +179,7 @@
     echo ">> Building ${NGINX_IMAGE}:${TAG}"
 
     BUILD_TAGS_NGINX="-t ${NGINX_IMAGE}:${TAG}"
-    if [ "$IS_PR" -eq 1 ]; then
+    if ! is_prerelease_tag "$TAG"; then
       BUILD_TAGS_NGINX="$BUILD_TAGS_NGINX -t ${NGINX_IMAGE}:latest"
     fi
 

@@ -1,5 +1,21 @@
 # Changelog
 
+## [2026.3.16](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.15...v2026.3.16) (2026-03-22)
+
+### Outras Melhorias
+
+* adjust release-it config for updated commit message format and pre-release script behavior ([dbdecfd](https://github.com/davidsonalencar/filament-startkit/commit/dbdecfd8b21db0adcefd61829e6a24b5dbf6e969))
+* clean up CHANGELOG by removing outdated entries ([0a84bb6](https://github.com/davidsonalencar/filament-startkit/commit/0a84bb69f62ef23ce69b228946f6e9e954c1a8aa))
+* disable changelog generation for pre-releases in release-it config ([c935104](https://github.com/davidsonalencar/filament-startkit/commit/c9351047769d0e43494cfae29482ba5d0e7da638))
+* enforce clean working directory and add image release hook to release-it config ([77e371e](https://github.com/davidsonalencar/filament-startkit/commit/77e371e4129e7ad80e47f7cb11dbe5a16d5ab1b3))
+* release v2026.3.16-pr.0 ([2a09095](https://github.com/davidsonalencar/filament-startkit/commit/2a090957370a396b48b2a07a8a8136c3ca700c88))
+* simplify prerelease tag check and update VERSION format ([431888f](https://github.com/davidsonalencar/filament-startkit/commit/431888fea461bb5f0e3af915652e05f4bc586b21))
+* simplify release-it configuration and clean up pre-release scripts ([90a9d73](https://github.com/davidsonalencar/filament-startkit/commit/90a9d7349a5d837489ee361d5325bba4c2c5afbe))
+* update release-it config and scripts for improved pre-release handling ([d1e8ac1](https://github.com/davidsonalencar/filament-startkit/commit/d1e8ac11d753414e9ee151dfaf5213f1b5ebe226))
+* update release-it config and scripts for improved pre-release handling ([ab24dc0](https://github.com/davidsonalencar/filament-startkit/commit/ab24dc0121eebdb87a79604901c6b2ddb16db5a4))
+* update release-it config to add success message after stack release ([4a870ec](https://github.com/davidsonalencar/filament-startkit/commit/4a870ecc5453af0ef1e67cb30749e9d5279af792))
+* update release-it config to use external pre-release settings file ([6f6f3e2](https://github.com/davidsonalencar/filament-startkit/commit/6f6f3e274ef76e4a993ab2c63d4dcb74a7c29a54))
+
 ## [2026.3.15](https://github.com/davidsonalencar/filament-startkit/compare/v2026.3.14...v2026.3.15) (2026-03-21)
 
 ### Outras Melhorias
