@@ -14,7 +14,7 @@
 .editorconfig
 .gitattributes
 .gitignore
-.release-it.jsondd
+.release-it.json
 AGENTS.md
 Envoy.blade.php
 auth.json
