@@ -50,16 +50,5 @@ require_dir() {
 }
 
 is_prerelease_tag() {
-  local tag="${1:-}"
-  local lower
-  lower="$(printf '%s' "$tag" | tr '[:upper:]' '[:lower:]')"
-
-  case "$lower" in
-    *-*)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
-  esac
+  [[ "$1" == *-* ]]
 }
