@@ -240,6 +240,7 @@
     }
 
     DEPLOY_TAG=$(resolve_version_tag "{{ $tag }}")
+
     if [ -z "$DEPLOY_TAG" ]; then
         fail "--tag nao definida"
     fi

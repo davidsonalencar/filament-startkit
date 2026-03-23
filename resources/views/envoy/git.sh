@@ -6,7 +6,7 @@ resolve_version_tag() {
 
   if [ "$requested_tag" = "latest" ]; then
     git fetch origin --tags >/dev/null 2>&1
-    requested_tag="$(git tag | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
+    requested_tag="$(git tag | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)"
   fi
 
   [ -n "${requested_tag:-}" ] || fail "Não foi possível resolver a tag"
