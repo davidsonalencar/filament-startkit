@@ -15,7 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(1000)->create();
+        $this->call(AdminUserSeeder::class);
+
+        if (User::count() < 10) {
+            User::factory(1000)->create();
+        }
 
 //        User::factory()->create([
 //            'name' => 'Test User',

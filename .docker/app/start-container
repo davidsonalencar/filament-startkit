@@ -182,13 +182,41 @@ run_migrations() {
 
         if [ "$APP_ENVIRONMENT" = "production" ]; then
             run_as_app_user "php artisan migrate --force || true"
-#           run_as_app_user "php artisan tenants:migrate --force || true"
+            #run_as_app_user "php artisan tenants:migrate --force || true"
         else
             run_as_app_user "php artisan migrate || true"
-#           run_as_app_user "php artisan tenants:migrate || true"
+            #run_as_app_user "php artisan tenants:migrate || true"
         fi
     else
         log "Migrations desabilitadas ou artisan não encontrado."
+    fi
+}
+
+# -------------------------------------------------------------------
+# Shield
+# -------------------------------------------------------------------
+run_shield_commands() {
+    if [ -f "$APP_DIR/artisan" ] && [ "${RUN_SHIELD:-1}" = "1" ]; then
+        log "Executando comandos de shield..."
+
+        run_as_app_user "php artisan shield:generate --panel=admin --option=policies_and_permissions --all || true"
+        #comando para os tenants
+    else
+        log "Shield desabilitado ou artisan não encontrado."
+    fi
+}
+
+# -------------------------------------------------------------------
+# Seeder
+# -------------------------------------------------------------------
+run_seeder_commands() {
+    if [ -f "$APP_DIR/artisan" ] && [ "${RUN_SEEDER:-1}" = "1" ]; then
+        log "Executando comandos de seeder..."
+
+        run_as_app_user "php artisan db:seeder || true"
+        #comando para os tenants
+    else
+        log "Shield desabilitado ou artisan não encontrado."
     fi
 }
 
@@ -200,16 +228,17 @@ run_optimize_commands() {
         log "Executando comandos de otimização..."
 
         run_as_app_user "php artisan optimize:clear || true"
-        #run_as_app_user "php artisan tenants:run optimize:clear || true"
+        #comando para os tenants
 
         if [ "$APP_ENVIRONMENT" = "production" ]; then
             run_as_app_user "php artisan optimize || true"
-            #run_as_app_user "php artisan tenants:run optimize || true"
+            #comando para os tenants
         fi
     else
         log "Optimize desabilitado ou artisan não encontrado."
     fi
 }
+
 
 # -------------------------------------------------------------------
 # Fluxo principal
@@ -222,6 +251,8 @@ main() {
     generate_secrets_if_needed
     prepare_production_public_dir
     run_migrations
+    run_shield_commands
+    run_seeder_commands
     run_optimize_commands
 
     log "Inicialização concluída. Executando processo principal: $*"
